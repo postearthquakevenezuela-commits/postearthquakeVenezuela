@@ -144,6 +144,8 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
   }
 
   let ARTISTS = [];
+  let BIOS = {}; // bioId -> extracted bio text (from data/bios.json)
+  fetch("data/bios.json", { cache: "no-store" }).then((r) => r.json()).then((b) => { BIOS = b || {}; }).catch(() => {});
 
   function renderGrid() {
     // Artists with images first; those without any image go to the end (stable).
@@ -194,10 +196,18 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
     cur = ARTISTS[i]; idx = 0;
     document.querySelector("#dName").textContent = cur.name;
     document.querySelector("#dMeta").innerHTML = metaHtml(cur);
-    const links = [];
-    if (cur.bioId) links.push(`<p class="detail__link">Artist bio: <a href="${driveView(cur.bioId)}" target="_blank" rel="noopener">open ↗</a></p>`);
-    if (cur.imageListId) links.push(`<p class="detail__link">Artwork details (titles, medium, dimensions, price): <a href="${driveView(cur.imageListId)}" target="_blank" rel="noopener">open ↗</a></p>`);
-    document.querySelector("#dLinks").innerHTML = links.join("");
+    let html = "";
+    const bioText = cur.bioId ? BIOS[cur.bioId] : "";
+    if (bioText) {
+      const long = bioText.length > 1400;
+      const shown = esc(long ? bioText.slice(0, 1400).trim() + "…" : bioText).replace(/\n/g, "<br>");
+      const more = cur.bioId ? ` <a href="${driveView(cur.bioId)}" target="_blank" rel="noopener">${long ? "full bio ↗" : "source ↗"}</a>` : "";
+      html += `<div class="detail__bio">${shown}${more}</div>`;
+    } else if (cur.bioId) {
+      html += `<p class="detail__link">Artist bio: <a href="${driveView(cur.bioId)}" target="_blank" rel="noopener">open ↗</a></p>`;
+    }
+    if (cur.imageListId) html += `<p class="detail__link">Artwork details (titles, medium, dimensions, price): <a href="${driveView(cur.imageListId)}" target="_blank" rel="noopener">open ↗</a></p>`;
+    document.querySelector("#dLinks").innerHTML = html;
     document.querySelector("#carDots").innerHTML = cur.imageIds.map((_, k) => `<button data-k="${k}" aria-label="Image ${k + 1}"></button>`).join("");
     document.querySelectorAll("#carDots button").forEach((d) => d.addEventListener("click", () => showSlide(+d.dataset.k)));
     showSlide(0);
