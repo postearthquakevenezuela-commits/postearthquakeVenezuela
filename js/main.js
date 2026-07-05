@@ -73,7 +73,8 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
   const grid = document.querySelector("#artGrid");
   if (!grid) return;
   const esc = (s) => (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const driveImg = (id) => `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
+  // lh3 public-content CDN loads in the browser; drive.google.com/thumbnail redirects to sign-in for Workspace files.
+  const driveImg = (id, w = 1200) => `https://lh3.googleusercontent.com/d/${id}=w${w}`;
   const driveView = (id) => `https://drive.google.com/file/d/${id}/view`;
   const driveIds = (s) => [...(s || "").matchAll(/(?:id=|\/d\/)([A-Za-z0-9_-]{20,})/g)].map((m) => m[1]);
   const firstId = (s) => driveIds(s)[0] || "";
@@ -150,7 +151,7 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
     grid.innerHTML = ARTISTS.map((a, i) => {
       const first = a.imageIds[0];
       const img = first
-        ? `<img src="${driveImg(first)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
+        ? `<img src="${driveImg(first, 800)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
         : "";
       const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
       const based = a.based ? `<span>${esc(a.based)}</span>` : "";
@@ -179,7 +180,7 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
     if (imgs.length) {
       imgEl.style.display = ""; ph.style.display = "none";
       imgEl.onerror = () => { imgEl.style.display = "none"; ph.style.display = "grid"; };
-      imgEl.src = driveImg(imgs[idx]); imgEl.alt = cur.name;
+      imgEl.src = driveImg(imgs[idx], 1600); imgEl.alt = cur.name;
     } else { imgEl.style.display = "none"; ph.style.display = "grid"; }
     document.querySelectorAll("#carDots button").forEach((d, k) => d.setAttribute("aria-current", String(k === idx)));
     const multi = imgs.length > 1;
