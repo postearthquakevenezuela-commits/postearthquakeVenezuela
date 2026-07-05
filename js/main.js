@@ -145,6 +145,8 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
   let ARTISTS = [];
 
   function renderGrid() {
+    // Artists with images first; those without any image go to the end (stable).
+    ARTISTS.sort((a, b) => (b.imageIds.length ? 1 : 0) - (a.imageIds.length ? 1 : 0));
     grid.innerHTML = ARTISTS.map((a, i) => {
       const first = a.imageIds[0];
       const img = first
