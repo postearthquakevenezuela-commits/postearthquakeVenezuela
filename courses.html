@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses — El sonsaque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand"><em>El sonsaque</em></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="siteNav">
+        <a href="art-fair.html">Art Fair</a>
+        <a href="courses.html" aria-current="page">Courses</a>
+        <a href="archive.html">Archive</a>
+        <a href="polyrithm.html">Polyrithm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <p class="eyebrow">02 — Courses</p>
+      <h1>Courses</h1>
+      <p>Upcoming courses are on the calendar — reserve your place. Courses already held are below, with their videos and descriptions.</p>
+    </div>
+
+    <div class="page-body">
+      <!-- ===== Upcoming: calendar (placeholder, imported from Drive) ===== -->
+      <section class="course-section">
+        <div class="section-label">
+          <h2>Upcoming courses</h2>
+          <!-- TODO: replace the email with the real booking address. -->
+          <a class="btn" id="bookAll" href="mailto:hello@example.com?subject=Booking%20%E2%80%94%20El%20sonsaque%20courses">Book upcoming courses →</a>
+        </div>
+        <div class="placeholder-panel">
+          <p class="placeholder-tag">Calendar — placeholder · will be imported from Google Drive</p>
+          <!-- Rendered by js/main.js from the COURSES list. Click a course to reserve. -->
+          <div id="courseCalendar"></div>
+        </div>
+      </section>
+
+      <!-- ===== Past: courses already held (previous style: video + description) ===== -->
+      <section class="course-section">
+        <h2>Past courses</h2>
+        <p class="section-note">Recordings of courses already held. <!-- TODO: replace the video IDs and descriptions with the real ones (YouTube/Vimeo). --></p>
+        <div class="courses" id="pastCourses">
+          <article class="course">
+            <div class="course__video"><iframe loading="lazy" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Past course 1" allowfullscreen></iframe></div>
+            <div class="course__body"><h3>Course title</h3><p>Instructor · short description of what the course covered.</p></div>
+          </article>
+          <article class="course">
+            <div class="course__video"><iframe loading="lazy" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Past course 2" allowfullscreen></iframe></div>
+            <div class="course__body"><h3>Course title</h3><p>Instructor · short description of what the course covered.</p></div>
+          </article>
+          <article class="course">
+            <div class="course__video"><iframe loading="lazy" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Past course 3" allowfullscreen></iframe></div>
+            <div class="course__body"><h3>Course title</h3><p>Instructor · short description of what the course covered.</p></div>
+          </article>
+          <article class="course">
+            <div class="course__video"><iframe loading="lazy" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Past course 4" allowfullscreen></iframe></div>
+            <div class="course__body"><h3>Course title</h3><p>Instructor · short description of what the course covered.</p></div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ===== Reservation / donation modal ===== -->
+  <div class="modal" id="courseModal" aria-hidden="true">
+    <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="modalName">
+      <button class="modal__close" id="modalClose" aria-label="Close">×</button>
+      <p class="modal__date" id="modalDate"></p>
+      <h3 class="modal__name" id="modalName"></h3>
+      <p class="modal__topic" id="modalTopic"></p>
+      <div class="modal__donate">
+        <p>This is an upcoming course. Your donation supports <em>El sonsaque</em> and helps reserve your place. Every donation goes to Poliritmo.</p>
+        <div class="modal__actions">
+          <a class="btn" href="polyrithm.html">Donate</a>
+          <a class="btn btn--ghost" id="modalBook" href="#">Book this course</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span><em>El sonsaque</em> — Post-earthquake Venezuela.</span>
+      <span>Every donation is delivered to Poliritmo.</span>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

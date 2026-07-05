@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El sonsaque</title>
+  <meta name="description" content="El sonsaque — post-earthquake Venezuela still needs: medicine, supply, knowledge, hands, democracy. Here's what you can do." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ===== INTRO (full screen) ===== -->
+  <div class="intro" id="intro" role="dialog" aria-label="Introduction">
+    <div class="intro__inner">
+      <p class="intro__brand"><em>El sonsaque</em></p>
+      <p class="intro__lead">Post-earthquake Venezuela still needs:</p>
+      <p class="intro__subtitle" id="introSubtitle">Medicine, supply, knowledge, hands, democracy.</p>
+      <p class="intro__hint" id="introHint">Click to reveal</p>
+      <div class="intro__actions">
+        <a href="#home" class="btn intro__cta" id="introEnter">Here's what you can do →</a>
+        <button class="btn btn--ghost intro__cta" id="introSkip" type="button">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand"><em>El sonsaque</em></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="siteNav">
+        <a href="art-fair.html">Art Fair</a>
+        <a href="courses.html">Courses</a>
+        <a href="archive.html">Archive</a>
+        <a href="polyrithm.html">Polyrithm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home">
+    <!-- ===== HERO (GIF) ===== -->
+    <section class="hero">
+      <figure class="hero__figure">
+        <img id="heroGif" src="assets/hero.gif" alt="El sonsaque campaign imagery"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+        <span class="hero__placeholder" style="display:none">Image pending — generated from the Google Drive spreadsheet</span>
+      </figure>
+    </section>
+
+    <p class="hero__needs">
+      Post-earthquake Venezuela still needs
+      <span class="accent">medicine, supply, knowledge, hands, democracy.</span>
+    </p>
+    <p class="hero__sub">Here's what you can do — explore the four spaces of <em>El sonsaque</em>.</p>
+
+    <!-- ===== 4 SECTIONS ===== -->
+    <nav class="index-grid" aria-label="Sections">
+      <a class="tile" href="art-fair.html">
+        <span class="tile__num">01</span>
+        <span>
+          <span class="tile__title display">Art Fair</span>
+          <span class="tile__desc">Works for sale to raise funds. Every proceed goes to Poliritmo.</span>
+        </span>
+        <span class="tile__go">Enter →</span>
+      </a>
+      <a class="tile" href="courses.html">
+        <span class="tile__num">02</span>
+        <span>
+          <span class="tile__title display">Courses</span>
+          <span class="tile__desc">A calendar of upcoming courses. Book your place and support the cause.</span>
+        </span>
+        <span class="tile__go">Enter →</span>
+      </a>
+      <a class="tile" href="archive.html">
+        <span class="tile__num">03</span>
+        <span>
+          <span class="tile__title display">Archive</span>
+          <span class="tile__desc">A memory of the campaign: images, documents, and records.</span>
+        </span>
+        <span class="tile__go">Enter →</span>
+      </a>
+      <a class="tile" href="polyrithm.html">
+        <span class="tile__num">04</span>
+        <span>
+          <span class="tile__title display">Polyrithm</span>
+          <span class="tile__desc">Donate and follow the transparency. Every donation goes to Poliritmo.</span>
+        </span>
+        <span class="tile__go">Enter →</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span><em>El sonsaque</em> — Post-earthquake Venezuela.</span>
+      <span>Every donation is delivered to Poliritmo.</span>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

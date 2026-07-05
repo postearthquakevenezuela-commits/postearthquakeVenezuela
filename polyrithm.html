@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polyrithm — El sonsaque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand"><em>El sonsaque</em></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="siteNav">
+        <a href="art-fair.html">Art Fair</a>
+        <a href="courses.html">Courses</a>
+        <a href="archive.html">Archive</a>
+        <a href="polyrithm.html" aria-current="page">Polyrithm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <p class="eyebrow">04 — Polyrithm</p>
+      <h1>Polyrithm</h1>
+      <p>Here you can donate and follow the transparency. <strong>Every donation goes to Poliritmo</strong>, the organization that delivers the aid to the people affected.</p>
+    </div>
+
+    <div class="page-body">
+      <!-- ===== Donate ===== -->
+      <div class="split" style="margin-bottom: 4rem;">
+        <div class="card">
+          <h3>PayPal / Card</h3>
+          <p>Donate in seconds with PayPal or a card.</p>
+          <!-- TODO: replace with your PayPal hosted donation button (hosted_button_id). -->
+          <form action="https://www.paypal.com/donate" method="post" target="_blank" rel="noopener" style="margin-top:1.2rem;">
+            <input type="hidden" name="hosted_button_id" value="YOUR_HOSTED_BUTTON_ID" />
+            <button type="submit" class="btn">Donate with PayPal</button>
+          </form>
+          <p class="note">Set up your button at paypal.com → Donations and paste the <code>hosted_button_id</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Zelle / Transfer</h3>
+          <p>Send your donation manually using these details:</p>
+          <ul class="data-list">
+            <li><span>Zelle</span><strong id="zelleEmail">email@example.com</strong></li>
+            <li><span>Account holder</span><strong>[Account holder name]</strong></li>
+            <li><span>Bank</span><strong>[Bank]</strong></li>
+          </ul>
+          <p class="note">Write <em>“El sonsaque — Poliritmo”</em> in the memo so we can record your contribution.</p>
+        </div>
+      </div>
+
+      <!-- ===== Transparency ===== -->
+      <h2 class="display" style="font-size:clamp(1.6rem,4vw,2.4rem); margin-bottom:1.5rem;">Transparency</h2>
+      <div class="progress" id="progress">
+        <div class="progress__row">
+          <span class="progress__raised" id="progressRaised">—</span>
+          <span class="progress__goal" id="progressGoal">Goal: —</span>
+        </div>
+        <div class="progress__bar"><div class="progress__fill" id="progressFill" style="width:0%"></div></div>
+        <p class="progress__note" id="dataNote"></p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="ledger" id="ledger">
+          <thead>
+            <tr><th>Date</th><th>Description</th><th>Destination</th><th class="num">Amount</th></tr>
+          </thead>
+          <tbody id="ledgerBody">
+            <tr><td colspan="4" class="muted">Loading data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span><em>El sonsaque</em> — Post-earthquake Venezuela.</span>
+      <span>Every donation is delivered to Poliritmo.</span>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>
