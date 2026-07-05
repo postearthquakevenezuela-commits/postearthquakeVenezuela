@@ -1,5 +1,5 @@
 /* ============================================================
-   El sonsaque — site logic (multi-page)
+   Post-earthquake Venezuela — site logic (multi-page)
    Set the values in CONFIG and everything else works on its own.
    ============================================================ */
 

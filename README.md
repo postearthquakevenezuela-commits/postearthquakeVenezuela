@@ -1,4 +1,4 @@
-# El sonsaque
+# Post-earthquake Venezuela
 
 Sitio web (estático, multipágina) por las víctimas del terremoto en Venezuela.
 Estética editorial/galería (referencia: tremainecollection.org).
@@ -34,6 +34,6 @@ python3 -m http.server 5178
 
 ## Publicar en GitHub Pages
 1. Crea tu cuenta: https://github.com/signup
-2. Crea un repositorio (p. ej. `el-sonsaque`) y sube estos archivos.
+2. Crea un repositorio (p. ej. `postearthquakeVenezuela`) y sube estos archivos.
 3. Settings → Pages → Source: rama `main`, carpeta `/root` → Save.
-4. Queda en `https://TU-USUARIO.github.io/el-sonsaque/`.
+4. Queda en `https://TU-USUARIO.github.io/postearthquakeVenezuela/`.
