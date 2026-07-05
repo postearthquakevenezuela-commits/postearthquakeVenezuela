@@ -30,12 +30,33 @@
       <p>Works donated by artists to support post-earthquake Venezuela. Each artist has set the share of the sale price they donate. Every proceed goes to Poliritmo.</p>
     </div>
     <div class="page-body">
-      <p class="artfair-note">Images and bios are loaded live from the submissions Google Drive. They will appear automatically once those files are shared publicly (“Anyone with the link”). The artist information below comes straight from the sheet.</p>
+      <p class="artfair-note">Live from the submissions Google Sheet — every update shows up automatically. Tap or click any artist to open their work in full, with all the details. Images appear once the Drive files are shared publicly (“Anyone with the link”).</p>
       <div class="artfair-grid" id="artGrid">
         <p class="muted">Loading catalog…</p>
       </div>
     </div>
   </main>
+
+  <!-- ===== Artwork detail screen (carousel + info) ===== -->
+  <div class="detail" id="artDetail" aria-hidden="true">
+    <div class="detail__box" role="dialog" aria-modal="true" aria-labelledby="dName">
+      <button class="detail__close" id="detailClose" aria-label="Close">×</button>
+      <div class="detail__media">
+        <div class="carousel">
+          <img class="carousel__img" id="carImg" alt="" />
+          <div class="carousel__ph" id="carPh">Image on Google Drive</div>
+          <button class="carousel__nav carousel__prev" id="carPrev" aria-label="Previous work">‹</button>
+          <button class="carousel__nav carousel__next" id="carNext" aria-label="Next work">›</button>
+          <div class="carousel__dots" id="carDots"></div>
+        </div>
+      </div>
+      <div class="detail__info">
+        <h2 class="detail__name" id="dName"></h2>
+        <div class="detail__meta" id="dMeta"></div>
+        <div id="dLinks"></div>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="site-footer__inner">

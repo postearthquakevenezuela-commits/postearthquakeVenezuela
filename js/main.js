@@ -96,7 +96,8 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
       donate: find(["percentage"]) >= 0 ? find(["percentage"]) : find(["donate"]),
       art: find(["art", "works"]),
       ilist: find(["image", "list"]),
-      price: find(["price"]),
+      // "price" also appears in the donation question ("...sale price..."); exclude it.
+      price: header.findIndex((h) => n(h).includes("price") && !n(h).includes("percentage")),
       based: find(["based"]),
       catalog: find(["added", "catalog"]),
     };
@@ -116,29 +117,107 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
     }).filter((a) => a.name || a.imageIds.length);
   }
 
-  function render(list) {
-    grid.innerHTML = list.map((a) => {
-        const hasImg = a.imageIds && a.imageIds[0];
-        const img = hasImg
-          ? `<img src="${driveImg(a.imageIds[0])}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
-          : "";
-        const insta = a.instagram ? `<a href="${esc(a.instagramUrl)}" target="_blank" rel="noopener">${esc(a.instagram)}</a>` : "";
-        const based = a.based ? `<span>${esc(a.based)}</span>` : "";
-        const price = a.price ? `<span>${esc(a.price)}</span>` : "";
-        const donate = a.donate ? `<span class="badge">Donates ${esc(a.donate)}</span>` : "";
-        const bio = a.bioId
-          ? `<details class="art-acc"><summary>Artist bio <span class="art-acc__sign">+</span></summary><div class="art-acc__body">Read the full bio on Google Drive: <a href="${driveView(a.bioId)}" target="_blank" rel="noopener">open ↗</a></div></details>` : "";
-        const ilist = a.imageListId
-          ? `<details class="art-acc"><summary>Artwork details <span class="art-acc__sign">+</span></summary><div class="art-acc__body">Titles, medium, dimensions &amp; price: <a href="${driveView(a.imageListId)}" target="_blank" rel="noopener">open ↗</a></div></details>` : "";
-        return `<article class="art-card">
-          <div class="art-card__img${hasImg ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span></div>
-          <div class="art-card__body">
-            <h3 class="art-card__name">${esc(a.name)}</h3>
-            <div class="art-card__meta">${insta}${based}${price}${donate}</div>
-            ${bio}${ilist}
-          </div>
-        </article>`;
-      }).join("");
+  // Merge rows by artist: one artist = one entry holding ALL their pieces.
+  function groupByArtist(list) {
+    const map = new Map();
+    for (const a of list) {
+      const key = (a.name || "").trim().toLowerCase();
+      if (!key) { map.set("_" + map.size, { ...a, imageIds: [...a.imageIds] }); continue; }
+      if (!map.has(key)) map.set(key, { ...a, imageIds: [...a.imageIds] });
+      else {
+        const g = map.get(key);
+        for (const id of a.imageIds) if (!g.imageIds.includes(id)) g.imageIds.push(id);
+        for (const k of ["instagram", "instagramUrl", "based", "price", "donate", "bioId", "imageListId"])
+          if (!g[k] && a[k]) g[k] = a[k];
+      }
+    }
+    return [...map.values()];
+  }
+
+  function metaHtml(a) {
+    const p = [];
+    if (a.instagram) p.push(`<a href="${esc(a.instagramUrl)}" target="_blank" rel="noopener">${esc(a.instagram)}</a>`);
+    if (a.based) p.push(`<span>${esc(a.based)}</span>`);
+    if (a.donate) p.push(`<span class="badge">Donates ${esc(a.donate)}</span>`);
+    return p.join("");
+  }
+
+  let ARTISTS = [];
+
+  function renderGrid() {
+    grid.innerHTML = ARTISTS.map((a, i) => {
+      const first = a.imageIds[0];
+      const img = first
+        ? `<img src="${driveImg(first)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
+        : "";
+      const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
+      const based = a.based ? `<span>${esc(a.based)}</span>` : "";
+      const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
+      return `<button class="art-card" data-i="${i}" aria-label="View works by ${esc(a.name)}">
+        <span class="art-card__img${first ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span>${count}</span>
+        <span class="art-card__body">
+          <span class="art-card__name">${esc(a.name)}</span>
+          <span class="art-card__meta">${based}${donate}</span>
+        </span>
+      </button>`;
+    }).join("");
+    grid.querySelectorAll(".art-card").forEach((b) => b.addEventListener("click", () => openDetail(+b.dataset.i)));
+  }
+
+  // ----- Detail screen with photo carousel -----
+  const detail = document.querySelector("#artDetail");
+  let cur = null, idx = 0;
+
+  function showSlide(n) {
+    const imgs = cur.imageIds;
+    const total = imgs.length || 1;
+    idx = ((n % total) + total) % total;
+    const imgEl = document.querySelector("#carImg");
+    const ph = document.querySelector("#carPh");
+    if (imgs.length) {
+      imgEl.style.display = ""; ph.style.display = "none";
+      imgEl.onerror = () => { imgEl.style.display = "none"; ph.style.display = "grid"; };
+      imgEl.src = driveImg(imgs[idx]); imgEl.alt = cur.name;
+    } else { imgEl.style.display = "none"; ph.style.display = "grid"; }
+    document.querySelectorAll("#carDots button").forEach((d, k) => d.setAttribute("aria-current", String(k === idx)));
+    const multi = imgs.length > 1;
+    document.querySelector("#carPrev").style.display = multi ? "" : "none";
+    document.querySelector("#carNext").style.display = multi ? "" : "none";
+    document.querySelector("#carDots").style.display = multi ? "" : "none";
+  }
+
+  function openDetail(i) {
+    if (!detail) return;
+    cur = ARTISTS[i]; idx = 0;
+    document.querySelector("#dName").textContent = cur.name;
+    document.querySelector("#dMeta").innerHTML = metaHtml(cur);
+    const links = [];
+    if (cur.bioId) links.push(`<p class="detail__link">Artist bio: <a href="${driveView(cur.bioId)}" target="_blank" rel="noopener">open ↗</a></p>`);
+    if (cur.imageListId) links.push(`<p class="detail__link">Artwork details (titles, medium, dimensions, price): <a href="${driveView(cur.imageListId)}" target="_blank" rel="noopener">open ↗</a></p>`);
+    document.querySelector("#dLinks").innerHTML = links.join("");
+    document.querySelector("#carDots").innerHTML = cur.imageIds.map((_, k) => `<button data-k="${k}" aria-label="Image ${k + 1}"></button>`).join("");
+    document.querySelectorAll("#carDots button").forEach((d) => d.addEventListener("click", () => showSlide(+d.dataset.k)));
+    showSlide(0);
+    detail.classList.add("is-open");
+    detail.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function closeDetail() {
+    detail.classList.remove("is-open");
+    detail.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  if (detail) {
+    document.querySelector("#detailClose").addEventListener("click", closeDetail);
+    document.querySelector("#carPrev").addEventListener("click", () => showSlide(idx - 1));
+    document.querySelector("#carNext").addEventListener("click", () => showSlide(idx + 1));
+    detail.addEventListener("click", (e) => { if (e.target === detail) closeDetail(); });
+    document.addEventListener("keydown", (e) => {
+      if (!detail.classList.contains("is-open")) return;
+      if (e.key === "Escape") closeDetail();
+      else if (e.key === "ArrowLeft") showSlide(idx - 1);
+      else if (e.key === "ArrowRight") showSlide(idx + 1);
+    });
   }
 
   grid.innerHTML = '<p class="muted">Loading catalog from Google…</p>';
@@ -146,14 +225,14 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
   fetch(ARTFAIR_CSV_URL, { cache: "no-store" })
     .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
     .then((text) => {
-      const list = rowsToArtworks(parseCSV(text));
-      if (!list.length) throw new Error("empty");
-      render(list);
+      ARTISTS = groupByArtist(rowsToArtworks(parseCSV(text)));
+      if (!ARTISTS.length) throw new Error("empty");
+      renderGrid();
     })
     .catch((err) => {
       console.warn("Art Fair live fetch failed, trying local copy:", err);
       fetch("data/artfair.json", { cache: "no-store" })
-        .then((r) => r.json()).then(render)
+        .then((r) => r.json()).then((l) => { ARTISTS = groupByArtist(l); renderGrid(); })
         .catch(() => { grid.innerHTML = '<p class="muted">Could not load the catalog.</p>'; });
     });
 })();
