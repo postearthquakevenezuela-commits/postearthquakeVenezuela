@@ -368,15 +368,15 @@ function rowsToRecords(rows) {
         iD = idx(["destino", "destination", "beneficiario"]), iM = idx(["monto", "amount", "cantidad", "valor"]);
   return rows.slice(1).map((r) => ({
     fecha: iF >= 0 ? r[iF] : "", concepto: iC >= 0 ? r[iC] : "",
-    destino: iD >= 0 ? r[iD] : "Poliritmo", monto: parseAmount(iM >= 0 ? r[iM] : "0"),
+    destino: iD >= 0 ? r[iD] : "Medical relief", monto: parseAmount(iM >= 0 ? r[iM] : "0"),
   }));
 }
 
 const DEMO = [
-  { fecha: "2026-06-28", concepto: "Weekly donations", destino: "Poliritmo", monto: 1850 },
-  { fecha: "2026-06-21", concepto: "Charity raffle", destino: "Poliritmo", monto: 1200 },
-  { fecha: "2026-06-14", concepto: "Individual contributions", destino: "Poliritmo", monto: 2450 },
-  { fecha: "2026-06-07", concepto: "Benefit concert", destino: "Poliritmo", monto: 3100 },
+  { fecha: "2026-06-28", concepto: "Weekly donations", destino: "Medical relief", monto: 1850 },
+  { fecha: "2026-06-21", concepto: "Charity raffle", destino: "Medical relief", monto: 1200 },
+  { fecha: "2026-06-14", concepto: "Individual contributions", destino: "Medical relief", monto: 2450 },
+  { fecha: "2026-06-07", concepto: "Benefit concert", destino: "Medical relief", monto: 3100 },
 ];
 
 function escapeHtml(s) {
@@ -396,7 +396,7 @@ function renderData(records, isDemo) {
   const body = $("#ledgerBody");
   if (!body) return;
   body.innerHTML = records.length
-    ? records.map((r) => `<tr><td>${escapeHtml(r.fecha)}</td><td>${escapeHtml(r.concepto)}</td><td>${escapeHtml(r.destino || "Poliritmo")}</td><td class="num">${formatMoney(r.monto)}</td></tr>`).join("")
+    ? records.map((r) => `<tr><td>${escapeHtml(r.fecha)}</td><td>${escapeHtml(r.concepto)}</td><td>${escapeHtml(r.destino || "Medical relief")}</td><td class="num">${formatMoney(r.monto)}</td></tr>`).join("")
     : '<tr><td colspan="4" class="muted">No transfers recorded yet.</td></tr>';
 }
 

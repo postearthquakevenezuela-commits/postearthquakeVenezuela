@@ -247,6 +247,18 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 .detail__meta a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
 .detail__bio { color: var(--ink); font-size: 1rem; line-height: 1.7; margin: 0 0 1.4rem; max-width: 52ch; }
 .detail__bio a { color: var(--accent); border-bottom: 1px solid currentColor; white-space: nowrap; }
+/* ===== About / prose ===== */
+.page-head .lead-strong { font-family: var(--display); font-size: clamp(1.35rem, 3vw, 2rem); line-height: 1.25; color: var(--ink); max-width: 32ch; margin-top: 1.2rem; }
+.prose { max-width: 68ch; }
+.prose h2 { font-family: var(--display); font-size: clamp(1.4rem, 3.5vw, 2rem); margin: 2.6rem 0 .7rem; }
+.prose p { margin: 0 0 1rem; line-height: 1.7; }
+.prose a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.about-facts { list-style: none; padding: 0; margin: 1.3rem 0; display: grid; gap: .4rem; }
+.about-facts li { display: flex; flex-wrap: wrap; gap: .2rem 1rem; padding: .8rem 0; border-bottom: 1px solid var(--line-soft); }
+.about-facts span { color: var(--muted); min-width: 92px; font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; padding-top: .15rem; }
+.about-facts strong { font-weight: 500; }
+.prose-close { font-family: var(--display); font-style: italic; font-size: clamp(1.2rem, 2.6vw, 1.55rem); line-height: 1.35; color: var(--accent); margin-top: 2.6rem; }
+
 .detail__bio { color: var(--ink); line-height: 1.65; }
 .detail__bio p { margin: 0 0 .85rem; }
 .detail__bio p:last-child { margin-bottom: 0; }
