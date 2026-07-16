@@ -117,10 +117,14 @@ const ARTFAIR_CITIES = [
     const get = (r, i) => (i >= 0 && i < r.length ? (r[i] || "").trim() : "");
     return rows.slice(1).map((r) => {
       const [handle, iurl] = instaOf(get(r, c.insta));
+      const bioCell = get(r, c.bio);
+      const bioIds = driveIds(bioCell);
       return {
         name: get(r, c.name), instagram: handle, instagramUrl: iurl,
         based: get(r, c.based), price: get(r, c.price), donate: get(r, c.donate),
-        imageIds: driveIds(get(r, c.art)), bioId: firstId(get(r, c.bio)), imageListId: firstId(get(r, c.ilist)),
+        imageIds: driveIds(get(r, c.art)),
+        bioId: bioIds[0] || "", bioText: bioIds.length ? "" : bioCell, // Miami bios come as inline text
+        imageListId: firstId(get(r, c.ilist)),
       };
     }).filter((a) => a.name || a.imageIds.length);
   }
@@ -135,7 +139,7 @@ const ARTFAIR_CITIES = [
       else {
         const g = map.get(key);
         for (const id of a.imageIds) if (!g.imageIds.includes(id)) g.imageIds.push(id);
-        for (const k of ["instagram", "instagramUrl", "based", "price", "donate", "bioId", "imageListId"])
+        for (const k of ["instagram", "instagramUrl", "based", "price", "donate", "bioId", "bioText", "imageListId"])
           if (!g[k] && a[k]) g[k] = a[k];
       }
     }
@@ -150,16 +154,32 @@ const ARTFAIR_CITIES = [
     return p.join("");
   }
 
+  // Light clean for bios typed directly into the sheet cell (strip leading name / ABOUT label).
+  function cleanInlineBio(t, name) {
+    const lines = t.replace(/\r/g, "\n").replace(/ /g, " ").split("\n").map((l) => l.trim());
+    const surname = (name || "").split(/\s+/).pop().toLowerCase();
+    while (lines.length) {
+      const l0 = lines[0];
+      if (!l0) { lines.shift(); continue; }
+      const low = l0.toLowerCase().replace(/[:.\-–—\s]+$/, "");
+      if (/^(about|bio|biography|artist(?:'s)? statement|statement)$/.test(low)) { lines.shift(); continue; }
+      if (name && (low === name.toLowerCase() || (l0.split(/\s+/).length <= 5 && surname && low.includes(surname)))) { lines.shift(); continue; }
+      break;
+    }
+    return lines.join(" ").replace(/\s{2,}/g, " ").trim();
+  }
+
   // Bio block: clean prose, capped at a sentence boundary, rendered as paragraphs.
   function bioHtml(a) {
-    const raw = (a.bioId ? BIOS[a.bioId] : "") || "";
+    const inline = (a.bioText && a.bioText.trim()) ? cleanInlineBio(a.bioText, a.name) : "";
+    const raw = inline || ((a.bioId ? BIOS[a.bioId] : "") || "");
     const link = a.bioId ? driveView(a.bioId) : "";
     if (raw.trim()) {
       let t = raw.trim(), truncated = false;
-      if (t.length > 560) {
-        let cut = t.slice(0, 560);
+      if (t.length > 800) {
+        let cut = t.slice(0, 800);
         const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
-        t = stop > 300 ? cut.slice(0, stop + 1) : cut.trim() + "…";
+        t = stop > 400 ? cut.slice(0, stop + 1) : cut.trim() + "…";
         truncated = true;
       }
       const paras = t.split(/\n{2,}/).map((p) => `<p>${esc(p.trim()).replace(/\n+/g, " ")}</p>`).join("");
