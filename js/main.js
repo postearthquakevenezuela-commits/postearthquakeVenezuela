@@ -68,7 +68,7 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 // To add a city, paste its sheet id below (Share → Anyone with the link).
 const ARTFAIR_CITIES = [
   { name: "Houston", sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78" },
-  { name: "Miami", sheetId: "" },       // paste the Miami sheet id here
+  { name: "Miami", sheetId: "", submitUrl: "https://shorturl.at/O1oqZ" }, // open call; add sheetId once works arrive
   { name: "Pittsburgh", sheetId: "" },  // paste the Pittsburgh sheet id here
 ];
 
@@ -259,11 +259,21 @@ const ARTFAIR_CITIES = [
   const csvUrl = (id) => `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
 
   // Build a section per city, then load each city's sheet live and fill its grid.
-  root.innerHTML = ARTFAIR_CITIES.map((c, i) => `
-    <section class="city-section">
-      <h2 class="city-title">${esc(c.name)}</h2>
-      <div class="artfair-grid" id="city-${i}"><p class="muted">${c.sheetId ? "Loading catalog from Google…" : "Submissions opening soon."}</p></div>
-    </section>`).join("");
+  root.innerHTML = ARTFAIR_CITIES.map((c, i) => {
+    let body;
+    if (c.sheetId) {
+      body = `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
+    } else if (c.submitUrl) {
+      body = `<div class="open-call">
+        <p class="open-call__status">Submissions now open</p>
+        <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
+        <a class="btn" href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Submit your work →</a>
+      </div>`;
+    } else {
+      body = `<div class="artfair-grid"><p class="muted">Submissions opening soon.</p></div>`;
+    }
+    return `<section class="city-section"><h2 class="city-title">${esc(c.name)}</h2>${body}</section>`;
+  }).join("");
 
   ARTFAIR_CITIES.forEach((c, i) => {
     const gridEl = document.querySelector(`#city-${i}`);
