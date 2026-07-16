@@ -205,6 +205,9 @@ main { min-height: 60vh; }
 .city-acc[open] .city-tab__sign { transform: rotate(45deg); }
 .city-acc__body { padding: .2rem 0 2.6rem; }
 .city-soon { color: var(--muted); padding: 0 0 1rem; }
+.open-banner { margin: 0 0 1.5rem; color: var(--muted); }
+.open-banner strong { color: var(--accent); font-weight: 500; }
+.open-banner a { color: var(--ink); border-bottom: 1px solid currentColor; }
 .open-call { border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: clamp(1.5rem, 4vw, 2.6rem); }
 .open-call__status { font-family: var(--display); font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--accent); margin: 0 0 .6rem; }
 .open-call__text { color: var(--muted); max-width: 58ch; margin: 0 0 1.5rem; line-height: 1.6; }

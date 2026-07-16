@@ -68,10 +68,10 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 // To add a city, paste its sheet id below (Share → Anyone with the link).
 const ARTFAIR_CITIES = [
   { name: "Houston", sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78" },
-  { // open call — form embedded; add sheetId once works start arriving
-    name: "Miami", sheetId: "",
+  { // live gallery + submissions still open
+    name: "Miami",
+    sheetId: "1reaSPn1zwLc6TGJfCTdcXBlnbb1cfVemHg8rLDqx10w",
     submitUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfiVPnxenVfPQuLdfRk2k8fFcZheYWGapP68jFjw_RoDUjEjg/viewform",
-    formEmbed: "https://docs.google.com/forms/d/e/1FAIpQLSfiVPnxenVfPQuLdfRk2k8fFcZheYWGapP68jFjw_RoDUjEjg/viewform?embedded=true",
   },
   { name: "Pittsburgh", sheetId: "" },  // paste the Pittsburgh sheet id here
 ];
@@ -266,7 +266,8 @@ const ARTFAIR_CITIES = [
   root.innerHTML = ARTFAIR_CITIES.map((c, i) => {
     let body;
     if (c.sheetId) {
-      body = `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
+      const banner = c.submitUrl ? `<p class="open-banner"><strong>Submissions now open</strong> — <a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">submit your work ↗</a></p>` : "";
+      body = banner + `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
     } else if (c.formEmbed) {
       body = `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
