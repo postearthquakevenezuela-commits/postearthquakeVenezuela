@@ -198,6 +198,9 @@ main { min-height: 60vh; }
 .open-call { border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: clamp(1.5rem, 4vw, 2.6rem); }
 .open-call__status { font-family: var(--display); font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--accent); margin: 0 0 .6rem; }
 .open-call__text { color: var(--muted); max-width: 58ch; margin: 0 0 1.5rem; line-height: 1.6; }
+.form-embed { border: 1px solid var(--line); background: #fff; overflow: hidden; }
+.form-embed iframe { width: 100%; height: 1200px; border: 0; display: block; }
+@media (max-width: 600px) { .form-embed iframe { height: 1500px; } }
 
 /* ===== Art Fair (from Google Sheet) ===== */
 .artfair-note { color: var(--muted); font-size: .9rem; border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: .8rem 1rem; margin: 0 0 2.2rem; }

@@ -68,7 +68,11 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 // To add a city, paste its sheet id below (Share → Anyone with the link).
 const ARTFAIR_CITIES = [
   { name: "Houston", sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78" },
-  { name: "Miami", sheetId: "", submitUrl: "https://shorturl.at/O1oqZ" }, // open call; add sheetId once works arrive
+  { // open call — form embedded; add sheetId once works start arriving
+    name: "Miami", sheetId: "",
+    submitUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfiVPnxenVfPQuLdfRk2k8fFcZheYWGapP68jFjw_RoDUjEjg/viewform",
+    formEmbed: "https://docs.google.com/forms/d/e/1FAIpQLSfiVPnxenVfPQuLdfRk2k8fFcZheYWGapP68jFjw_RoDUjEjg/viewform?embedded=true",
+  },
   { name: "Pittsburgh", sheetId: "" },  // paste the Pittsburgh sheet id here
 ];
 
@@ -263,6 +267,13 @@ const ARTFAIR_CITIES = [
     let body;
     if (c.sheetId) {
       body = `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
+    } else if (c.formEmbed) {
+      body = `<div class="open-call">
+        <p class="open-call__status">Submissions now open</p>
+        <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
+        <div class="form-embed"><iframe src="${esc(c.formEmbed)}" title="${esc(c.name)} submission form" loading="lazy">Loading…</iframe></div>
+        <p class="detail__link"><a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Or open the form in a new tab ↗</a></p>
+      </div>`;
     } else if (c.submitUrl) {
       body = `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
