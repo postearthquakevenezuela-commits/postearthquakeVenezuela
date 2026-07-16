@@ -281,9 +281,13 @@ const ARTFAIR_CITIES = [
         <a class="btn" href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Submit your work →</a>
       </div>`;
     } else {
-      body = `<div class="artfair-grid"><p class="muted">Submissions opening soon.</p></div>`;
+      body = `<p class="muted city-soon">Coming soon.</p>`;
     }
-    return `<section class="city-section"><h2 class="city-title">${esc(c.name)}</h2>${body}</section>`;
+    const open = i === 0 ? " open" : "";
+    return `<details class="city-acc"${open}>
+      <summary class="city-tab"><span>${esc(c.name)}</span><span class="city-tab__sign">+</span></summary>
+      <div class="city-acc__body">${body}</div>
+    </details>`;
   }).join("");
 
   ARTFAIR_CITIES.forEach((c, i) => {
