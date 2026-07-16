@@ -192,6 +192,10 @@ main { min-height: 60vh; }
 .placeholder-panel { border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: 1.3rem clamp(1rem, 3vw, 2rem) .6rem; }
 .placeholder-tag { font-size: .74rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 .4rem; }
 
+/* ===== Art Fair cities ===== */
+.city-section { margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+.city-title { font-family: var(--display); font-size: clamp(1.6rem, 4vw, 2.4rem); margin: 0 0 1.4rem; padding-bottom: .6rem; border-bottom: 1px solid var(--line); }
+
 /* ===== Art Fair (from Google Sheet) ===== */
 .artfair-note { color: var(--muted); font-size: .9rem; border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: .8rem 1rem; margin: 0 0 2.2rem; }
 .artfair-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.4rem, 3vw, 2.4rem); }

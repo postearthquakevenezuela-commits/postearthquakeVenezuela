@@ -64,14 +64,17 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 })();
 
 /* ---------- Art Fair (Art Fair page only) ---------- */
-// Live catalog: reads the submissions Google Sheet on every page load, so any
-// update to the sheet shows up on the site automatically. Set the id below.
-const ARTFAIR_SHEET_ID = "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78";
-const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_ID}/gviz/tq?tqx=out:csv`;
+// One city = one Google Sheet. Each section reads its sheet live on every load.
+// To add a city, paste its sheet id below (Share → Anyone with the link).
+const ARTFAIR_CITIES = [
+  { name: "Houston", sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78" },
+  { name: "Miami", sheetId: "" },       // paste the Miami sheet id here
+  { name: "Pittsburgh", sheetId: "" },  // paste the Pittsburgh sheet id here
+];
 
 (function initArtFair() {
-  const grid = document.querySelector("#artGrid");
-  if (!grid) return;
+  const root = document.querySelector("#artFair");
+  if (!root) return;
   const esc = (s) => (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   // lh3 public-content CDN loads in the browser; drive.google.com/thumbnail redirects to sign-in for Workspace files.
   const driveImg = (id, w = 1200) => `https://lh3.googleusercontent.com/d/${id}=w${w}`;
@@ -169,30 +172,35 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
       : "";
   }
 
-  let ARTISTS = [];
+  let ALL = []; // global registry of artists across all cities (detail uses ALL[i])
   let BIOS = {}; // bioId -> extracted bio text (from data/bios.json)
   fetch("data/bios.json", { cache: "no-store" }).then((r) => r.json()).then((b) => { BIOS = b || {}; }).catch(() => {});
 
-  function renderGrid() {
+  function cardHtml(a, gi) {
+    const first = a.imageIds[0];
+    const img = first
+      ? `<img src="${driveImg(first, 800)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
+      : "";
+    const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
+    const based = a.based ? `<span>${esc(a.based)}</span>` : "";
+    const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
+    return `<button class="art-card" data-i="${gi}" aria-label="View works by ${esc(a.name)}">
+      <span class="art-card__img${first ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span>${count}</span>
+      <span class="art-card__body">
+        <span class="art-card__name">${esc(a.name)}</span>
+        <span class="art-card__meta">${based}${donate}</span>
+      </span>
+    </button>`;
+  }
+
+  // Render one city's artists into its grid, registering them in the global ALL list.
+  function renderCity(artists, gridEl) {
     // Artists with images first; those without any image go to the end (stable).
-    ARTISTS.sort((a, b) => (b.imageIds.length ? 1 : 0) - (a.imageIds.length ? 1 : 0));
-    grid.innerHTML = ARTISTS.map((a, i) => {
-      const first = a.imageIds[0];
-      const img = first
-        ? `<img src="${driveImg(first, 800)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
-        : "";
-      const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
-      const based = a.based ? `<span>${esc(a.based)}</span>` : "";
-      const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
-      return `<button class="art-card" data-i="${i}" aria-label="View works by ${esc(a.name)}">
-        <span class="art-card__img${first ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span>${count}</span>
-        <span class="art-card__body">
-          <span class="art-card__name">${esc(a.name)}</span>
-          <span class="art-card__meta">${based}${donate}</span>
-        </span>
-      </button>`;
-    }).join("");
-    grid.querySelectorAll(".art-card").forEach((b) => b.addEventListener("click", () => openDetail(+b.dataset.i)));
+    artists.sort((a, b) => (b.imageIds.length ? 1 : 0) - (a.imageIds.length ? 1 : 0));
+    const start = ALL.length;
+    ALL.push(...artists);
+    gridEl.innerHTML = artists.map((a, k) => cardHtml(a, start + k)).join("") || '<p class="muted">No works yet.</p>';
+    gridEl.querySelectorAll(".art-card").forEach((b) => b.addEventListener("click", () => openDetail(+b.dataset.i)));
   }
 
   // ----- Detail screen with photo carousel -----
@@ -219,7 +227,7 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
 
   function openDetail(i) {
     if (!detail) return;
-    cur = ARTISTS[i]; idx = 0;
+    cur = ALL[i]; idx = 0;
     document.querySelector("#dName").textContent = cur.name;
     document.querySelector("#dMeta").innerHTML = metaHtml(cur);
     document.querySelector("#dLinks").innerHTML = bioHtml(cur) + detailLinks(cur);
@@ -248,21 +256,36 @@ const ARTFAIR_CSV_URL = `https://docs.google.com/spreadsheets/d/${ARTFAIR_SHEET_
     });
   }
 
-  grid.innerHTML = '<p class="muted">Loading catalog from Google…</p>';
-  // Live from the Google Sheet on every load; fall back to the bundled copy if the fetch fails.
-  fetch(ARTFAIR_CSV_URL, { cache: "no-store" })
-    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
-    .then((text) => {
-      ARTISTS = groupByArtist(rowsToArtworks(parseCSV(text)));
-      if (!ARTISTS.length) throw new Error("empty");
-      renderGrid();
-    })
-    .catch((err) => {
-      console.warn("Art Fair live fetch failed, trying local copy:", err);
-      fetch("data/artfair.json", { cache: "no-store" })
-        .then((r) => r.json()).then((l) => { ARTISTS = groupByArtist(l); renderGrid(); })
-        .catch(() => { grid.innerHTML = '<p class="muted">Could not load the catalog.</p>'; });
-    });
+  const csvUrl = (id) => `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
+
+  // Build a section per city, then load each city's sheet live and fill its grid.
+  root.innerHTML = ARTFAIR_CITIES.map((c, i) => `
+    <section class="city-section">
+      <h2 class="city-title">${esc(c.name)}</h2>
+      <div class="artfair-grid" id="city-${i}"><p class="muted">${c.sheetId ? "Loading catalog from Google…" : "Submissions opening soon."}</p></div>
+    </section>`).join("");
+
+  ARTFAIR_CITIES.forEach((c, i) => {
+    const gridEl = document.querySelector(`#city-${i}`);
+    if (!c.sheetId) return; // city without a sheet yet → keep the placeholder
+    fetch(csvUrl(c.sheetId), { cache: "no-store" })
+      .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then((text) => {
+        const artists = groupByArtist(rowsToArtworks(parseCSV(text)));
+        if (!artists.length) { gridEl.innerHTML = '<p class="muted">No works yet.</p>'; return; }
+        renderCity(artists, gridEl);
+      })
+      .catch((err) => {
+        console.warn("Art Fair " + c.name + " fetch failed:", err);
+        if (i === 0) { // the bundled copy is the first city's catalog
+          fetch("data/artfair.json", { cache: "no-store" })
+            .then((r) => r.json()).then((l) => renderCity(groupByArtist(l), gridEl))
+            .catch(() => { gridEl.innerHTML = '<p class="muted">Could not load the catalog.</p>'; });
+        } else {
+          gridEl.innerHTML = '<p class="muted">Could not load this catalog.</p>';
+        }
+      });
+  });
 })();
 
 /* ---------- Courses calendar (Courses page only) ---------- */
