@@ -4,7 +4,7 @@
    ============================================================ */
 
 const CONFIG = {
-  goal: 10000,
+  goal: 8000,
   currency: "USD",
   // Google Sheet PUBLISHED as CSV (File → Share → Publish to web → CSV).
   // Leave empty to use demo data.
@@ -445,26 +445,19 @@ function rowsToRecords(rows) {
 }
 
 const DEMO = [
-  { fecha: "2026-06-28", concepto: "Weekly donations", destino: "Medical relief", monto: 1850 },
-  { fecha: "2026-06-21", concepto: "Charity raffle", destino: "Medical relief", monto: 1200 },
-  { fecha: "2026-06-14", concepto: "Individual contributions", destino: "Medical relief", monto: 2450 },
-  { fecha: "2026-06-07", concepto: "Benefit concert", destino: "Medical relief", monto: 3100 },
+  { fecha: "2026-07-31", concepto: "Donations to date", destino: "Insumos médicos", monto: 1844 },
 ];
 
 function escapeHtml(s) {
   return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-function renderData(records, isDemo) {
+function renderData(records) {
   const total = records.reduce((a, r) => a + (r.monto || 0), 0);
   const pct = Math.min(100, CONFIG.goal ? (total / CONFIG.goal) * 100 : 0);
   $("#progressRaised") && ($("#progressRaised").textContent = formatMoney(total));
   $("#progressGoal") && ($("#progressGoal").textContent = "Goal: " + formatMoney(CONFIG.goal));
   $("#progressFill") && ($("#progressFill").style.width = pct.toFixed(1) + "%");
-  const note = $("#dataNote");
-  if (note) note.textContent = isDemo
-    ? "Demo data. Connect your Google Sheet in js/main.js (CONFIG.sheetCsvUrl) to show live figures."
-    : "Live data from the spreadsheet. Updates on page reload.";
   const body = $("#ledgerBody");
   if (!body) return;
   body.innerHTML = records.length
@@ -474,15 +467,15 @@ function renderData(records, isDemo) {
 
 async function loadData() {
   if (!$("#ledgerBody")) return; // not on the Polyrithm page
-  if (!CONFIG.sheetCsvUrl) { renderData(DEMO, true); return; }
+  if (!CONFIG.sheetCsvUrl) { renderData(DEMO); return; }
   try {
     const res = await fetch(CONFIG.sheetCsvUrl, { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const records = rowsToRecords(parseCSV(await res.text()));
-    renderData(records.length ? records : DEMO, records.length === 0);
+    renderData(records.length ? records : DEMO);
   } catch (err) {
     console.warn("Could not load the sheet, using demo data:", err);
-    renderData(DEMO, true);
+    renderData(DEMO);
   }
 }
 loadData();
