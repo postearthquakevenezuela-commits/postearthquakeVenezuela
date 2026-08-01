@@ -301,6 +301,17 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 .detail__buy { margin: 0 0 1.4rem; }
 .detail__link { margin: .8rem 0 0; color: var(--muted); font-size: .95rem; }
 .detail__link a { color: var(--ink); border-bottom: 1px solid currentColor; }
+
+/* ===== Buy form (Buy a piece page) ===== */
+.buy-form { max-width: 46rem; display: grid; gap: 1.2rem; }
+.buy-form__row { display: grid; gap: .4rem; }
+.buy-form__row label { font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.buy-form input, .buy-form textarea {
+  font-family: var(--font); font-size: 1rem; color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line); padding: .8rem .9rem; width: 100%; resize: vertical;
+}
+.buy-form input:focus, .buy-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.buy-form .btn { justify-self: start; }
 @media (max-width: 800px) {
   .detail__box { grid-template-columns: 1fr; }
   .detail__media { min-height: 46vh; }

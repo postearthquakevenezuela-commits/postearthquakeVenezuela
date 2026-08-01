@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buy a piece — Post-earthquake Venezuela</title>
+  <meta name="description" content="Pay via PayPal or Venmo and send us the piece details — Post-earthquake Venezuela Art Fair." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand"><em>Post-earthquake Venezuela</em></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="siteNav">
+        <a href="art-fair.html">Art Fair</a>
+        <a href="courses.html">Courses</a>
+        <a href="archive.html">Archive</a>
+        <a href="polyrithm.html">Donate</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <p class="eyebrow">Art Fair</p>
+      <h1>Buy a piece</h1>
+      <p>Pay with PayPal or Venmo, then tell us which piece it's for — we'll confirm by email and coordinate delivery or pickup.</p>
+    </div>
+
+    <div class="page-body">
+      <div class="split" style="margin-bottom:3rem;">
+        <div class="card">
+          <h3>PayPal</h3>
+          <p>Pay in seconds with PayPal or a card.</p>
+          <div class="qr-box">
+            <img src="assets/donate-paypal-qr.png" alt="QR code to pay via PayPal to Violette Bule" loading="lazy" />
+            <span class="qr-box__hint">Scan with your phone camera, or tap the button.</span>
+          </div>
+          <a class="btn" href="https://www.paypal.com/qrcodes/p2pqrc/Q8B4KWSMA68EL" target="_blank" rel="noopener">Pay with PayPal</a>
+          <p class="note">Goes to <strong>Violette Bule</strong>, campaign co-organizer.</p>
+        </div>
+        <div class="card">
+          <h3>Venmo</h3>
+          <p>Pay instantly from the Venmo app.</p>
+          <div class="qr-box">
+            <img src="assets/donate-venmo-qr.png" alt="QR code to pay via Venmo to @Vbule-21" loading="lazy" />
+            <span class="qr-box__hint">Scan with the Venmo app, or tap the button.</span>
+          </div>
+          <a class="btn" href="https://venmo.com/u/Vbule-21" target="_blank" rel="noopener">Pay with Venmo</a>
+          <p class="note">Handle: <strong>@Vbule-21</strong> (Violette Bule).</p>
+        </div>
+      </div>
+
+      <h2 class="display" style="font-size:clamp(1.6rem,4vw,2.4rem); margin:0 0 .6rem;">Tell us what you bought</h2>
+      <p class="section-note" id="buyIntro">After paying, send us the piece and artist so we can confirm your purchase.</p>
+
+      <form id="buyForm" class="buy-form card">
+        <div class="buy-form__row">
+          <label for="bfArtist">Artist</label>
+          <input type="text" id="bfArtist" name="artist" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="bfPiece">Piece / artwork</label>
+          <input type="text" id="bfPiece" name="piece" placeholder="Title, medium, or how it's labeled on the artist's page" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="bfName">Your name</label>
+          <input type="text" id="bfName" name="name" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="bfEmail">Your email</label>
+          <input type="email" id="bfEmail" name="email" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="bfMessage">Message (optional)</label>
+          <textarea id="bfMessage" name="message" rows="4" placeholder="Payment method used, delivery/pickup preference, anything else we should know."></textarea>
+        </div>
+        <button type="submit" class="btn">Send purchase request →</button>
+        <p class="note">This opens your email app with the details filled in — we reply to confirm and arrange delivery.</p>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span><em>Post-earthquake Venezuela</em></span>
+      <span>100% of proceeds go to emergency medical relief in Venezuela.</span>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

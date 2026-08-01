@@ -162,14 +162,12 @@ const ARTFAIR_CITIES = [
     return p.join("");
   }
 
-  // Mailto inquiry — there's no per-artwork checkout, so "buying" routes to the fair's contact email.
+  // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details).
   function buyHtml(a) {
     const price = realPrice(a.price);
-    const subject = encodeURIComponent(`Purchase inquiry — ${a.name}`);
-    const priceLine = price ? ` (listed at ${price})` : "";
-    const body = encodeURIComponent(`Hi, I'm interested in buying a piece by ${a.name}${priceLine}. Please let me know how to proceed.\n\nThank you!`);
+    const params = new URLSearchParams({ artist: a.name, city: a.city || "" });
     const label = price ? `Buy this piece — ${esc(price)} →` : "Buy this piece →";
-    return `<p class="detail__buy"><a class="btn" href="mailto:artistsforvenezuelamiami@gmail.com?subject=${subject}&body=${body}">${label}</a></p>`;
+    return `<p class="detail__buy"><a class="btn" href="buy.html?${params.toString()}">${label}</a></p>`;
   }
 
   // Light clean for bios typed directly into the sheet cell (strip leading name / ABOUT label).
@@ -236,7 +234,8 @@ const ARTFAIR_CITIES = [
   }
 
   // Render one city's artists into its grid, registering them in the global ALL list.
-  function renderCity(artists, gridEl) {
+  function renderCity(artists, gridEl, cityName) {
+    artists.forEach((a) => { a.city = cityName || a.city || ""; });
     // Artists with images first; those without any image go to the end (stable).
     artists.sort((a, b) => (b.imageIds.length ? 1 : 0) - (a.imageIds.length ? 1 : 0));
     const start = ALL.length;
@@ -336,13 +335,13 @@ const ARTFAIR_CITIES = [
       .then((text) => {
         const artists = groupByArtist(rowsToArtworks(parseCSV(text)));
         if (!artists.length) { gridEl.innerHTML = '<p class="muted">No works yet.</p>'; return; }
-        renderCity(artists, gridEl);
+        renderCity(artists, gridEl, c.name);
       })
       .catch((err) => {
         console.warn("Art Fair " + c.name + " fetch failed:", err);
         if (i === 0) { // the bundled copy is the first city's catalog
           fetch("data/artfair.json", { cache: "no-store" })
-            .then((r) => r.json()).then((l) => renderCity(groupByArtist(l), gridEl))
+            .then((r) => r.json()).then((l) => renderCity(groupByArtist(l), gridEl, c.name))
             .catch(() => { gridEl.innerHTML = '<p class="muted">Could not load the catalog.</p>'; });
         } else {
           gridEl.innerHTML = '<p class="muted">Could not load this catalog.</p>';
@@ -412,6 +411,41 @@ const ARTFAIR_CITIES = [
   document.querySelector("#modalClose")?.addEventListener("click", close);
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+})();
+
+/* ---------- Buy a piece (Buy page only) ---------- */
+(function initBuyForm() {
+  const form = document.querySelector("#buyForm");
+  if (!form) return;
+
+  const params = new URLSearchParams(location.search);
+  const artist = params.get("artist") || "";
+  const city = params.get("city") || "";
+
+  const artistField = document.querySelector("#bfArtist");
+  if (artist && artistField) artistField.value = artist;
+
+  const intro = document.querySelector("#buyIntro");
+  if (intro && artist) {
+    intro.textContent = `After paying, send us the piece details for ${artist}${city ? " (" + city + ")" : ""} so we can confirm your purchase.`;
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = (id) => (document.querySelector(id)?.value || "").trim();
+    const to = city.toLowerCase() === "houston" ? "artistsforvenezuela@gmail.com" : "artistsforvenezuelamiami@gmail.com";
+    const subject = `Purchase — ${val("#bfArtist")} — ${val("#bfPiece")}`;
+    const body = [
+      `Artist: ${val("#bfArtist")}`,
+      `Piece: ${val("#bfPiece")}`,
+      city ? `City: ${city}` : "",
+      "",
+      `From: ${val("#bfName")} (${val("#bfEmail")})`,
+      "",
+      val("#bfMessage"),
+    ].filter(Boolean).join("\n");
+    window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
 })();
 
 /* ---------- Transparency (Polyrithm page only) ---------- */
