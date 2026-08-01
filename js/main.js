@@ -162,10 +162,14 @@ const ARTFAIR_CITIES = [
     return p.join("");
   }
 
-  // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details).
-  function buyHtml(a) {
+  // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details,
+  // pre-filled with artist, piece, and a reference image so nobody has to type it from memory).
+  function buyHtml(a, slideIdx) {
     const price = realPrice(a.price);
-    const params = new URLSearchParams({ artist: a.name, city: a.city || "" });
+    const total = a.imageIds.length;
+    const piece = total > 1 ? `Piece ${slideIdx + 1} of ${total}` : "";
+    const img = total ? a.imageIds[slideIdx] || a.imageIds[0] : "";
+    const params = new URLSearchParams({ artist: a.name, city: a.city || "", piece, img });
     const label = price ? `Buy this piece — ${esc(price)} →` : "Buy this piece →";
     return `<p class="detail__buy"><a class="btn" href="buy.html?${params.toString()}">${label}</a></p>`;
   }
@@ -264,6 +268,7 @@ const ARTFAIR_CITIES = [
     document.querySelector("#carPrev").style.display = multi ? "" : "none";
     document.querySelector("#carNext").style.display = multi ? "" : "none";
     document.querySelector("#carDots").style.display = multi ? "" : "none";
+    document.querySelector("#dBuy").innerHTML = buyHtml(cur, idx);
   }
 
   function openDetail(i) {
@@ -271,7 +276,7 @@ const ARTFAIR_CITIES = [
     cur = ALL[i]; idx = 0;
     document.querySelector("#dName").textContent = cur.name;
     document.querySelector("#dMeta").innerHTML = metaHtml(cur);
-    document.querySelector("#dLinks").innerHTML = buyHtml(cur) + bioHtml(cur) + detailLinks(cur);
+    document.querySelector("#dLinks").innerHTML = bioHtml(cur) + detailLinks(cur);
     document.querySelector("#carDots").innerHTML = cur.imageIds.map((_, k) => `<button data-k="${k}" aria-label="Image ${k + 1}"></button>`).join("");
     document.querySelectorAll("#carDots button").forEach((d) => d.addEventListener("click", () => showSlide(+d.dataset.k)));
     showSlide(0);
@@ -421,13 +426,26 @@ const ARTFAIR_CITIES = [
   const params = new URLSearchParams(location.search);
   const artist = params.get("artist") || "";
   const city = params.get("city") || "";
+  const piece = params.get("piece") || "";
+  const img = params.get("img") || "";
+  const imgView = img ? `https://drive.google.com/file/d/${img}/view` : "";
 
   const artistField = document.querySelector("#bfArtist");
   if (artist && artistField) artistField.value = artist;
+  const pieceField = document.querySelector("#bfPiece");
+  if (pieceField) pieceField.value = piece || (artist ? `Work by ${artist}` : "");
 
   const intro = document.querySelector("#buyIntro");
   if (intro && artist) {
-    intro.textContent = `After paying, send us the piece details for ${artist}${city ? " (" + city + ")" : ""} so we can confirm your purchase.`;
+    intro.textContent = `We've filled in the piece and artist below — just add your name and email so we can confirm your purchase${city ? " (" + city + ")" : ""}.`;
+  }
+
+  const ref = document.querySelector("#buyRef");
+  if (ref && img) {
+    ref.hidden = false;
+    document.querySelector("#buyRefImg").src = `https://lh3.googleusercontent.com/d/${img}=w200`;
+    document.querySelector("#buyRefTitle").textContent = piece || artist;
+    document.querySelector("#buyRefSub").textContent = artist && piece ? `by ${artist}` : "";
   }
 
   form.addEventListener("submit", (e) => {
@@ -439,6 +457,7 @@ const ARTFAIR_CITIES = [
       `Artist: ${val("#bfArtist")}`,
       `Piece: ${val("#bfPiece")}`,
       city ? `City: ${city}` : "",
+      imgView ? `Reference image: ${imgView}` : "",
       "",
       `From: ${val("#bfName")} (${val("#bfEmail")})`,
       "",
