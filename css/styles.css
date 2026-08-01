@@ -215,6 +215,11 @@ main { min-height: 60vh; }
 .form-embed iframe { width: 100%; height: 1200px; border: 0; display: block; }
 @media (max-width: 600px) { .form-embed iframe { height: 1500px; } }
 
+.doc-embed { border: 1px solid var(--line); background: #fff; overflow: hidden; margin: 1.2rem 0; }
+.doc-embed iframe { width: 100%; height: 900px; border: 0; display: block; }
+.doc-embed__text { color: var(--muted); max-width: 62ch; line-height: 1.6; margin: 0 0 1rem; }
+@media (max-width: 600px) { .doc-embed iframe { height: 600px; } }
+
 /* ===== Art Fair (from Google Sheet) ===== */
 .artfair-note { color: var(--muted); font-size: .9rem; border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: .8rem 1rem; margin: 0 0 2.2rem; }
 .artfair-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.4rem, 3vw, 2.4rem); }
@@ -295,6 +300,10 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 
 /* ===== Polyrithm (donate + transparency) ===== */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 3vw, 3rem); }
+.split--3 { grid-template-columns: repeat(3, 1fr); }
+.qr-box { display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; }
+.qr-box img { width: 108px; height: 108px; border: 1px solid var(--line); background: #fff; padding: 6px; }
+.qr-box__hint { font-size: .85rem; color: var(--muted); }
 .card { border: 1px solid var(--line); padding: clamp(1.5rem, 3vw, 2.2rem); background: var(--paper-2); }
 .card h3 { font-family: var(--display); font-size: 1.5rem; }
 .card > p { color: var(--muted); }

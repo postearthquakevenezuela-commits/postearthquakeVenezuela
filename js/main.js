@@ -67,7 +67,11 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 // One city = one Google Sheet. Each section reads its sheet live on every load.
 // To add a city, paste its sheet id below (Share → Anyone with the link).
 const ARTFAIR_CITIES = [
-  { name: "Houston", sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78" },
+  {
+    name: "Houston",
+    sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78",
+    submitUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfIkl9H9oeomfBjAgEEoeUf5m7kJX3dpUdYHxo1UTAmlhiU2Q/viewform?pli=1",
+  },
   { // live gallery + submissions still open
     name: "Miami",
     sheetId: "1reaSPn1zwLc6TGJfCTdcXBlnbb1cfVemHg8rLDqx10w",
@@ -286,26 +290,25 @@ const ARTFAIR_CITIES = [
   root.innerHTML = ARTFAIR_CITIES.map((c, i) => {
     let body;
     if (c.sheetId) {
-      const banner = c.submitUrl ? `<p class="open-banner"><strong>Submissions now open</strong> — <a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">submit your work ↗</a></p>` : "";
+      const banner = c.submitUrl ? `<p class="open-banner"><strong>Submissions now open</strong> — <a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair ↗</a></p>` : "";
       body = banner + `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
     } else if (c.formEmbed) {
       body = `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
         <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
         <div class="form-embed"><iframe src="${esc(c.formEmbed)}" title="${esc(c.name)} submission form" loading="lazy">Loading…</iframe></div>
-        <p class="detail__link"><a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Or open the form in a new tab ↗</a></p>
+        <p class="detail__link"><a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair ↗</a></p>
       </div>`;
     } else if (c.submitUrl) {
       body = `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
         <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
-        <a class="btn" href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Submit your work →</a>
+        <a class="btn" href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair →</a>
       </div>`;
     } else {
       body = `<p class="muted city-soon">Coming soon.</p>`;
     }
-    const open = i === 0 ? " open" : "";
-    return `<details class="city-acc"${open}>
+    return `<details class="city-acc">
       <summary class="city-tab"><span>${esc(c.name)}</span><span class="city-tab__sign">+</span></summary>
       <div class="city-acc__body">${body}</div>
     </details>`;
