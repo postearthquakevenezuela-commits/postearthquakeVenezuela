@@ -108,8 +108,8 @@ const ARTFAIR_CITIES = [
       donate: find(["percentage"]) >= 0 ? find(["percentage"]) : find(["donate"]),
       art: find(["art", "works"]),
       ilist: find(["image", "list"]),
-      // "price" also appears in the donation question ("...sale price..."); exclude it.
-      price: header.findIndex((h) => n(h).includes("price") && !n(h).includes("percentage")),
+      // "price" also appears in the donation question and the image-list column's description; exclude both.
+      price: header.findIndex((h) => n(h).includes("price") && !n(h).includes("percentage") && !n(h).includes("image")),
       based: find(["based"]),
       catalog: find(["added", "catalog"]),
     };
@@ -150,12 +150,26 @@ const ARTFAIR_CITIES = [
     return [...map.values()];
   }
 
+  // Guards against stray links or long text landing in the price cell (messy sheet data).
+  const realPrice = (p) => (p && !/^https?:\/\//i.test(p) && p.length <= 40) ? p : "";
+
   function metaHtml(a) {
     const p = [];
     if (a.instagram) p.push(`<a href="${esc(a.instagramUrl)}" target="_blank" rel="noopener">${esc(a.instagram)}</a>`);
     if (a.based) p.push(`<span>${esc(a.based)}</span>`);
+    if (realPrice(a.price)) p.push(`<span class="badge">${esc(a.price)}</span>`);
     if (a.donate) p.push(`<span class="badge">Donates ${esc(a.donate)}</span>`);
     return p.join("");
+  }
+
+  // Mailto inquiry — there's no per-artwork checkout, so "buying" routes to the fair's contact email.
+  function buyHtml(a) {
+    const price = realPrice(a.price);
+    const subject = encodeURIComponent(`Purchase inquiry — ${a.name}`);
+    const priceLine = price ? ` (listed at ${price})` : "";
+    const body = encodeURIComponent(`Hi, I'm interested in buying a piece by ${a.name}${priceLine}. Please let me know how to proceed.\n\nThank you!`);
+    const label = price ? `Buy this piece — ${esc(price)} →` : "Buy this piece →";
+    return `<p class="detail__buy"><a class="btn" href="mailto:artistsforvenezuelamiami@gmail.com?subject=${subject}&body=${body}">${label}</a></p>`;
   }
 
   // Light clean for bios typed directly into the sheet cell (strip leading name / ABOUT label).
@@ -258,7 +272,7 @@ const ARTFAIR_CITIES = [
     cur = ALL[i]; idx = 0;
     document.querySelector("#dName").textContent = cur.name;
     document.querySelector("#dMeta").innerHTML = metaHtml(cur);
-    document.querySelector("#dLinks").innerHTML = bioHtml(cur) + detailLinks(cur);
+    document.querySelector("#dLinks").innerHTML = buyHtml(cur) + bioHtml(cur) + detailLinks(cur);
     document.querySelector("#carDots").innerHTML = cur.imageIds.map((_, k) => `<button data-k="${k}" aria-label="Image ${k + 1}"></button>`).join("");
     document.querySelectorAll("#carDots button").forEach((d) => d.addEventListener("click", () => showSlide(+d.dataset.k)));
     showSlide(0);

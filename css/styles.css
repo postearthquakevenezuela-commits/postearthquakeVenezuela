@@ -298,6 +298,7 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 .detail__bio { color: var(--ink); line-height: 1.65; }
 .detail__bio p { margin: 0 0 .85rem; }
 .detail__bio p:last-child { margin-bottom: 0; }
+.detail__buy { margin: 0 0 1.4rem; }
 .detail__link { margin: .8rem 0 0; color: var(--muted); font-size: .95rem; }
 .detail__link a { color: var(--ink); border-bottom: 1px solid currentColor; }
 @media (max-width: 800px) {
