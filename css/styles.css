@@ -205,7 +205,11 @@ main { min-height: 60vh; }
 .city-acc[open] .city-tab__sign { transform: rotate(45deg); }
 .city-acc__body { padding: .2rem 0 2.6rem; }
 .city-soon { color: var(--muted); padding: 0 0 1rem; }
-.event-info { margin: 0 0 1rem; color: var(--ink); font-weight: 500; }
+.city-announce { border-top: 1px solid var(--line); padding: 1.4rem .1rem 0; }
+.city-announce + .city-acc { border-top: 0; }
+.event-info { margin: 0 0 1rem; color: var(--ink); max-width: 68ch; line-height: 1.6; }
+.event-info strong { color: var(--accent); font-weight: 500; }
+.event-info a { color: var(--ink); border-bottom: 1px solid currentColor; }
 .open-banner { margin: 0 0 1.5rem; color: var(--muted); }
 .open-banner strong { color: var(--accent); font-weight: 500; }
 .open-banner a { color: var(--ink); border-bottom: 1px solid currentColor; }
