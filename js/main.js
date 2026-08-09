@@ -71,6 +71,7 @@ const ARTFAIR_CITIES = [
     name: "Houston",
     sheetId: "1Xv2k4e3i6gE-GGTPPZBznLVKzNvgObJs1FwBu3Wio78",
     submitUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfIkl9H9oeomfBjAgEEoeUf5m7kJX3dpUdYHxo1UTAmlhiU2Q/viewform?pli=1",
+    announceHtml: 'Art League Houston will host a fundraising pop up art fair for Venezuelan earthquake victims on Saturday, August 22, from 6 pm to 9 pm at its Montrose art space, 1953 Montrose Blvd, Houston, TX 77006. The fair is organized by Violette Bule, with Beatriz Bellorín, Luisa Duarte, Nicolás Gerardi, Gabriela Magaña, Rosa Ana Orlando and Eleanora Rodriguez. For more information or to donate, <a href="polyrithm.html">click here</a>.',
   },
   { // live gallery + submissions still open
     name: "Miami",
@@ -307,24 +308,29 @@ const ARTFAIR_CITIES = [
   // Build a section per city, then load each city's sheet live and fill its grid.
   root.innerHTML = ARTFAIR_CITIES.map((c, i) => {
     let body;
+    const eventInfo = c.announceHtml
+      ? `<p class="event-info">${c.announceHtml}</p>`
+      : (c.date || c.venue)
+      ? `<p class="event-info">${[c.date, c.venue].filter(Boolean).map(esc).join(" — ")}</p>`
+      : "";
     if (c.sheetId) {
       const banner = c.submitUrl ? `<p class="open-banner"><strong>Submissions now open</strong> — <a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair ↗</a></p>` : "";
-      body = banner + `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
+      body = eventInfo + banner + `<div class="artfair-grid" id="city-${i}"><p class="muted">Loading catalog from Google…</p></div>`;
     } else if (c.formEmbed) {
-      body = `<div class="open-call">
+      body = eventInfo + `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
         <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
         <div class="form-embed"><iframe src="${esc(c.formEmbed)}" title="${esc(c.name)} submission form" loading="lazy">Loading…</iframe></div>
         <p class="detail__link"><a href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair ↗</a></p>
       </div>`;
     } else if (c.submitUrl) {
-      body = `<div class="open-call">
+      body = eventInfo + `<div class="open-call">
         <p class="open-call__status">Submissions now open</p>
         <p class="open-call__text">We warmly encourage artists to take part. Donate an artwork, artist book, zine, or fanzine to help raise funds for emergency medical relief in Venezuela.</p>
         <a class="btn" href="${esc(c.submitUrl)}" target="_blank" rel="noopener">Fill the form, be part of our fair →</a>
       </div>`;
     } else {
-      body = `<p class="muted city-soon">Coming soon.</p>`;
+      body = eventInfo + `<p class="muted city-soon">Coming soon.</p>`;
     }
     return `<details class="city-acc">
       <summary class="city-tab"><span>${esc(c.name)}</span><span class="city-tab__sign">+</span></summary>
