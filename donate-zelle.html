@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donate with Zelle — Post-earthquake Venezuela</title>
+  <meta name="description" content="Donate via Zelle — Post-earthquake Venezuela relief fund." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand"><em>Post-earthquake Venezuela</em></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">Menu</button>
+      <nav class="site-nav" id="siteNav">
+        <a href="art-fair.html">Art Fair</a>
+        <a href="courses.html">Courses</a>
+        <a href="archive.html">Archive</a>
+        <a href="polyrithm.html" aria-current="page">Donate</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <p class="eyebrow">Donate</p>
+      <h1>Donate with Zelle</h1>
+      <p>Scan the QR code or use the details below to send your donation, then fill in the form so we can confirm it — <strong>100% goes to emergency medical relief in Venezuela.</strong></p>
+    </div>
+
+    <div class="page-body">
+      <div class="split" style="margin-bottom:3rem;">
+        <div class="card">
+          <h3>Zelle</h3>
+          <p>Send your donation directly, no fees.</p>
+          <div class="qr-box">
+            <img src="assets/donate-zelle-qr.png" alt="QR code to donate via Zelle to Violette Bule" loading="lazy" />
+            <span class="qr-box__hint">Scan in your banking app, or use the details below.</span>
+          </div>
+          <ul class="data-list">
+            <li><span>Zelle</span><strong id="zelleEmail">bule.violette@gmail.com</strong></li>
+            <li><span>Account holder</span><strong>Violette Bule</strong></li>
+          </ul>
+          <p class="note">Write <em>“Post-earthquake Venezuela relief”</em> in the memo so we can record your contribution.</p>
+        </div>
+      </div>
+
+      <h2 class="display" style="font-size:clamp(1.6rem,4vw,2.4rem); margin:0 0 .6rem;">Confirm your donation</h2>
+      <p class="section-note">After sending via Zelle, let us know so we can record it — this opens your email app with the details filled in.</p>
+
+      <form id="zelleForm" class="buy-form card">
+        <div class="buy-form__row">
+          <label for="zfFirstName">Nombre</label>
+          <input type="text" id="zfFirstName" name="firstName" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="zfLastName">Apellido</label>
+          <input type="text" id="zfLastName" name="lastName" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="zfAmount">Monto Abonado</label>
+          <input type="text" id="zfAmount" name="amount" placeholder="$" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="zfDate">Fecha</label>
+          <input type="text" id="zfDate" name="date" readonly />
+        </div>
+        <button type="submit" class="btn">Send confirmation →</button>
+        <p class="note">This opens your email app with the details filled in — we reply to confirm your contribution.</p>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <span><em>Post-earthquake Venezuela</em></span>
+      <span>100% of proceeds go to emergency medical relief in Venezuela.</span>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -476,6 +476,32 @@ const ARTFAIR_CITIES = [
   });
 })();
 
+/* ---------- Donate via Zelle (Zelle donate page only) ---------- */
+(function initZelleForm() {
+  const form = document.querySelector("#zelleForm");
+  if (!form) return;
+
+  const dateField = document.querySelector("#zfDate");
+  const today = new Date();
+  if (dateField) {
+    dateField.value = today.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = (id) => (document.querySelector(id)?.value || "").trim();
+    const to = "artistsforvenezuelamiami@gmail.com";
+    const subject = `Zelle donation — ${val("#zfFirstName")} ${val("#zfLastName")}`;
+    const body = [
+      `Nombre: ${val("#zfFirstName")}`,
+      `Apellido: ${val("#zfLastName")}`,
+      `Monto Abonado: ${val("#zfAmount")}`,
+      `Fecha: ${val("#zfDate")}`,
+    ].join("\n");
+    window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+})();
+
 /* ---------- Transparency (Polyrithm page only) ---------- */
 function formatMoney(n) {
   try {
