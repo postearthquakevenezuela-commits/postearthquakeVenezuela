@@ -31,7 +31,12 @@
       <p>Works donated by artists to support post-earthquake Venezuela. Each artist has set the share of the sale price they donate. 100% of proceeds go to emergency medical relief in Venezuela.</p>
     </div>
     <div class="page-body">
-      <p class="artfair-note">Three cities, each a benefit art fair for Venezuela. Live from the submissions Google Sheets — every update shows up automatically. Tap or click any artist to open their work in full, with all the details.</p>
+      <p class="artfair-note">Three cities, each a benefit art fair for Venezuela.</p>
+      <div class="artfair-search">
+        <input type="search" id="artFairSearch" placeholder="Search by artist, technique, price…" aria-label="Search artists across Houston, Miami, and Pittsburgh" />
+        <p class="muted artfair-search__hint" id="artFairSearchHint" hidden></p>
+      </div>
+      <div id="artFairResults" hidden></div>
       <div id="artFair">
         <p class="muted">Loading catalog…</p>
       </div>

@@ -271,7 +271,43 @@ const ARTFAIR_CITIES = [
     ALL.push(...artists);
     gridEl.innerHTML = artists.map((a, k) => cardHtml(a, start + k)).join("") || '<p class="muted">No works yet.</p>';
     gridEl.querySelectorAll(".art-card").forEach((b) => b.addEventListener("click", () => openDetail(+b.dataset.i)));
+    runSearch(); // re-apply an active search now that more artists just loaded
   }
+
+  // Search across every loaded city (name, technique/medium, price, location, bio…).
+  function matchesQuery(a, q) {
+    const hay = [a.name, a.based, a.price, a.donate, a.instagram, a.city, a.bioText, a.bioId ? BIOS[a.bioId] : ""]
+      .filter(Boolean).join(" ").toLowerCase();
+    return q.split(/\s+/).filter(Boolean).every((term) => hay.includes(term));
+  }
+
+  function runSearch() {
+    const input = document.querySelector("#artFairSearch");
+    const resultsEl = document.querySelector("#artFairResults");
+    const hint = document.querySelector("#artFairSearchHint");
+    const listEl = document.querySelector("#artFair");
+    if (!input || !resultsEl || !listEl) return;
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      resultsEl.hidden = true;
+      listEl.hidden = false;
+      if (hint) hint.hidden = true;
+      return;
+    }
+    listEl.hidden = true;
+    resultsEl.hidden = false;
+    const matches = ALL.map((a, i) => ({ a, i })).filter(({ a }) => matchesQuery(a, q));
+    resultsEl.innerHTML = matches.length
+      ? `<div class="artfair-grid">${matches.map(({ a, i }) => cardHtml(a, i)).join("")}</div>`
+      : `<p class="muted">No matches yet — try a different name, technique, or price.</p>`;
+    resultsEl.querySelectorAll(".art-card").forEach((b) => b.addEventListener("click", () => openDetail(+b.dataset.i)));
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = `${matches.length} artist${matches.length === 1 ? "" : "s"} found across Houston, Miami, and Pittsburgh.`;
+    }
+  }
+
+  document.querySelector("#artFairSearch")?.addEventListener("input", runSearch);
 
   // ----- Detail screen with photo carousel -----
   const detail = document.querySelector("#artDetail");
