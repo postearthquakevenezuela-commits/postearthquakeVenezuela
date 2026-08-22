@@ -4,7 +4,6 @@
    ============================================================ */
 
 const CONFIG = {
-  goal: 8000,
   currency: "USD",
   // Google Sheet PUBLISHED as CSV (File → Share → Publish to web → CSV).
   // Leave empty to use demo data.
@@ -786,10 +785,7 @@ function escapeHtml(s) {
 
 function renderData(records) {
   const total = records.reduce((a, r) => a + (r.monto || 0), 0);
-  const pct = Math.min(100, CONFIG.goal ? (total / CONFIG.goal) * 100 : 0);
   $("#progressRaised") && ($("#progressRaised").textContent = formatMoney(total));
-  $("#progressGoal") && ($("#progressGoal").textContent = "Goal: " + formatMoney(CONFIG.goal));
-  $("#progressFill") && ($("#progressFill").style.width = pct.toFixed(1) + "%");
   const body = $("#ledgerBody");
   if (!body) return;
   body.innerHTML = records.length
