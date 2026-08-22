@@ -113,7 +113,16 @@ const ARTFAIR_CITIES = [
       price: header.findIndex((h) => n(h).includes("price") && !n(h).includes("percentage") && !n(h).includes("image")),
       based: find(["based"]),
       catalog: find(["added", "catalog"]),
+      sold: find(["sold"]) >= 0 ? find(["sold"]) : find(["vendido"]),
     };
+  }
+
+  // "Sold" cell holds piece numbers matching the "Piece N of M" the buyer sees
+  // (e.g. "1" or "1,3"), or "ALL" if every piece from this artist is gone.
+  function parseSold(raw) {
+    const all = /\ball\b/i.test(raw || "");
+    const pieces = new Set((raw || "").split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)));
+    return { all, pieces };
   }
 
   function rowsToArtworks(rows) {
@@ -130,6 +139,7 @@ const ARTFAIR_CITIES = [
         imageIds: driveIds(get(r, c.art)),
         bioId: bioIds[0] || "", bioText: bioIds.length ? "" : bioCell, // Miami bios come as inline text
         imageListId: firstId(get(r, c.ilist)),
+        soldRaw: get(r, c.sold),
       };
     }).filter((a) => a.name || a.imageIds.length);
   }
@@ -146,8 +156,10 @@ const ARTFAIR_CITIES = [
         for (const id of a.imageIds) if (!g.imageIds.includes(id)) g.imageIds.push(id);
         for (const k of ["instagram", "instagramUrl", "based", "price", "donate", "bioId", "bioText", "imageListId"])
           if (!g[k] && a[k]) g[k] = a[k];
+        if (a.soldRaw) g.soldRaw = [g.soldRaw, a.soldRaw].filter(Boolean).join(",");
       }
     }
+    for (const g of map.values()) g.sold = parseSold(g.soldRaw);
     return [...map.values()];
   }
 
@@ -166,6 +178,8 @@ const ARTFAIR_CITIES = [
   // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details,
   // pre-filled with artist, piece, and a reference image so nobody has to type it from memory).
   function buyHtml(a, slideIdx) {
+    const sold = a.sold && (a.sold.all || a.sold.pieces.has(slideIdx + 1));
+    if (sold) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
     const price = realPrice(a.price);
     const total = a.imageIds.length;
     const piece = total > 1 ? `Piece ${slideIdx + 1} of ${total}` : "";
@@ -221,6 +235,15 @@ const ARTFAIR_CITIES = [
   let BIOS = {}; // bioId -> extracted bio text (from data/bios.json)
   fetch("data/bios.json", { cache: "no-store" }).then((r) => r.json()).then((b) => { BIOS = b || {}; }).catch(() => {});
 
+  function allSold(a) {
+    if (!a.sold) return false;
+    if (a.sold.all) return true;
+    const total = a.imageIds.length;
+    if (!total) return false;
+    for (let n = 1; n <= total; n++) if (!a.sold.pieces.has(n)) return false;
+    return true;
+  }
+
   function cardHtml(a, gi) {
     const first = a.imageIds[0];
     const img = first
@@ -229,8 +252,9 @@ const ARTFAIR_CITIES = [
     const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
     const based = a.based ? `<span>${esc(a.based)}</span>` : "";
     const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
+    const sold = allSold(a) ? `<span class="art-card__sold">Sold — Vendido</span>` : "";
     return `<button class="art-card" data-i="${gi}" aria-label="View works by ${esc(a.name)}">
-      <span class="art-card__img${first ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span>${count}</span>
+      <span class="art-card__img${first ? "" : " is-empty"}">${img}<span class="art-card__ph">Image on Google Drive</span>${count}${sold}</span>
       <span class="art-card__body">
         <span class="art-card__name">${esc(a.name)}</span>
         <span class="art-card__meta">${based}${donate}</span>
@@ -457,6 +481,20 @@ const ARTFAIR_CITIES = [
     document.querySelector("#buyRefSub").textContent = artist && piece ? `by ${artist}` : "";
   }
 
+  // Payment-memo reminders: tell buyers what to write in each method's note/memo
+  // so an incoming Zelle/PayPal/Venmo payment can be matched to a purchase.
+  const esc = (s) => (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const refLabel = [artist, piece].filter(Boolean).join(" — ");
+  if (refLabel) {
+    const memoHtml = (method) => `<strong>${esc(method)} note:</strong> write "${esc(refLabel)}". <em>Nota del ${esc(method)}: escribe "${esc(refLabel)}".</em>`;
+    const setMemo = (id, method) => { const el = document.querySelector(id); if (el) el.innerHTML = memoHtml(method); };
+    setMemo("#memoPaypal", "PayPal");
+    setMemo("#memoVenmo", "Venmo");
+    setMemo("#memoZelle", "Zelle");
+    const generic = document.querySelector("#memoGeneric");
+    if (generic) generic.hidden = true;
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const val = (id) => (document.querySelector(id)?.value || "").trim();
@@ -469,6 +507,7 @@ const ARTFAIR_CITIES = [
       imgView ? `Reference image: ${imgView}` : "",
       "",
       `From: ${val("#bfName")} (${val("#bfEmail")})`,
+      `Shipping address: ${val("#bfShipping")}`,
       "",
       val("#bfMessage"),
     ].filter(Boolean).join("\n");

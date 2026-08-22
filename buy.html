@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Buy a piece — Post-earthquake Venezuela</title>
-  <meta name="description" content="Pay via PayPal or Venmo and send us the piece details — Post-earthquake Venezuela Art Fair." />
+  <meta name="description" content="Pay via PayPal, Venmo, or Zelle and send us the piece details — Post-earthquake Venezuela Art Fair." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -29,11 +29,11 @@
     <div class="page-head">
       <p class="eyebrow">Art Fair</p>
       <h1>Buy a piece</h1>
-      <p>Pay with PayPal or Venmo, then tell us which piece it's for — we'll confirm by email and coordinate delivery or pickup.</p>
+      <p>Pay with PayPal, Venmo, or Zelle, then tell us which piece it's for — we'll confirm by email and coordinate delivery or pickup.</p>
     </div>
 
     <div class="page-body">
-      <div class="split" style="margin-bottom:3rem;">
+      <div class="split split--3" style="margin-bottom:1.2rem;">
         <div class="card">
           <h3>PayPal</h3>
           <p>Pay in seconds with PayPal or a card.</p>
@@ -43,6 +43,7 @@
           </div>
           <a class="btn" href="https://www.paypal.com/qrcodes/p2pqrc/Q8B4KWSMA68EL" target="_blank" rel="noopener">Pay with PayPal</a>
           <p class="note">Goes to <strong>Violette Bule</strong>, campaign co-organizer.</p>
+          <p class="note payment-memo" id="memoPaypal"></p>
         </div>
         <div class="card">
           <h3>Venmo</h3>
@@ -53,8 +54,23 @@
           </div>
           <a class="btn" href="https://venmo.com/u/Vbule-21" target="_blank" rel="noopener">Pay with Venmo</a>
           <p class="note">Handle: <strong>@Vbule-21</strong> (Violette Bule).</p>
+          <p class="note payment-memo" id="memoVenmo"></p>
+        </div>
+        <div class="card">
+          <h3>Zelle</h3>
+          <p>Send your payment directly, no fees.</p>
+          <div class="qr-box">
+            <img src="assets/donate-zelle-qr.png" alt="QR code to pay via Zelle to Violette Bule" loading="lazy" />
+            <span class="qr-box__hint">Scan in your banking app, or use the details below.</span>
+          </div>
+          <ul class="data-list">
+            <li><span>Zelle</span><strong>bule.violette@gmail.com</strong></li>
+            <li><span>Account holder</span><strong>Violette Bule</strong></li>
+          </ul>
+          <p class="note payment-memo" id="memoZelle"></p>
         </div>
       </div>
+      <p class="section-note payment-memo-generic" id="memoGeneric">Whichever method you use, please include the artist's name and the piece title in the payment note/memo. <em>Sea cual sea el método que uses, por favor incluye el nombre del artista y el título de la obra en la nota o memo del pago.</em></p>
 
       <h2 class="display" style="font-size:clamp(1.6rem,4vw,2.4rem); margin:0 0 .6rem;">Tell us what you bought</h2>
       <p class="section-note" id="buyIntro">After paying, send us the piece and artist so we can confirm your purchase.</p>
@@ -83,6 +99,10 @@
         <div class="buy-form__row">
           <label for="bfEmail">Your email</label>
           <input type="email" id="bfEmail" name="email" required />
+        </div>
+        <div class="buy-form__row">
+          <label for="bfShipping">Shipping address</label>
+          <textarea id="bfShipping" name="shipping" rows="3" placeholder="Street, city, state, ZIP — or write 'Pickup' if you'll collect it in person." required></textarea>
         </div>
         <div class="buy-form__row">
           <label for="bfMessage">Message (optional)</label>

@@ -91,6 +91,8 @@ h1, h2, h3 { font-weight: 500; line-height: 1.05; margin: 0; letter-spacing: -.0
 .btn:hover { background: transparent; color: var(--ink); }
 .btn--ghost { background: transparent; color: var(--ink); }
 .btn--ghost:hover { background: var(--ink); color: var(--paper); }
+.btn--sold { background: var(--line-soft); color: var(--muted); border-color: var(--line-soft); cursor: default; }
+.btn--sold:hover { background: var(--line-soft); color: var(--muted); }
 .link-underline { border-bottom: 1px solid currentColor; padding-bottom: 1px; }
 
 /* ===== Home hero (GIF) ===== */
@@ -265,6 +267,7 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 .art-card__name { display: block; font-family: var(--display); font-size: 1.25rem; }
 .art-card__meta { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; color: var(--muted); font-size: .86rem; margin-top: .25rem; }
 .art-card__count { position: absolute; bottom: .55rem; right: .55rem; background: rgba(20,19,15,.78); color: #fff; font-size: .68rem; letter-spacing: .04em; padding: .18rem .55rem; border-radius: 999px; }
+.art-card__sold { position: absolute; top: .55rem; left: .55rem; background: var(--accent); color: #fff; font-size: .68rem; letter-spacing: .04em; padding: .18rem .55rem; border-radius: 999px; text-transform: uppercase; }
 
 /* ===== Artwork detail screen ===== */
 .detail { position: fixed; inset: 0; z-index: 130; display: none; background: rgba(20,19,15,.9); overflow: auto; }
@@ -341,6 +344,10 @@ details.art-acc[open] .art-acc__sign { transform: rotate(45deg); }
 .data-list span { color: var(--muted); }
 .note { font-size: .85rem; color: var(--muted); margin-top: 1rem; }
 .note code { background: rgba(0,0,0,.06); padding: .1rem .35rem; border-radius: 3px; }
+.payment-memo { color: var(--ink); }
+.payment-memo em { color: var(--muted); font-style: italic; }
+.payment-memo-generic { color: var(--muted); max-width: 60ch; margin: 0 0 2.4rem; }
+.payment-memo-generic em { font-style: italic; }
 
 .progress { border: 1px solid var(--line); padding: 1.8rem; margin: 0 0 2.5rem; background: var(--paper-2); }
 .progress__row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .8rem; }
