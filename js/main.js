@@ -591,6 +591,35 @@ const DEMO = [
   { fecha: "2026-07-31", concepto: "Donations to date", destino: "Insumos médicos", monto: 1844 },
 ];
 
+// Art Fair sales flow into Transparency automatically: whichever city sheet has a
+// "Sold Amount" column, every confirmed number in it gets summed into one ledger line.
+async function computeArtSalesRecords() {
+  const records = [];
+  for (const c of ARTFAIR_CITIES) {
+    if (!c.sheetId) continue;
+    try {
+      const res = await fetch(`https://docs.google.com/spreadsheets/d/${c.sheetId}/gviz/tq?tqx=out:csv`, { cache: "no-store" });
+      if (!res.ok) continue;
+      const rows = parseCSV(await res.text());
+      if (!rows.length) continue;
+      const header = rows[0].map((h) => (h || "").toLowerCase());
+      const idx = header.findIndex((h) => h.includes("sold") && (h.includes("amount") || h.includes("monto") || h.includes("received") || h.includes("recibido")));
+      if (idx < 0) continue;
+      let total = 0, count = 0;
+      for (const r of rows.slice(1)) {
+        const v = parseAmount(r[idx] || "");
+        if (v > 0) { total += v; count++; }
+      }
+      if (total > 0) {
+        records.push({ fecha: new Date().toISOString().slice(0, 10), concepto: `Art Fair sales (${count} piece${count === 1 ? "" : "s"})`, destino: `Art Fair ${c.name}`, monto: total });
+      }
+    } catch (err) {
+      console.warn("Could not load art sales for " + c.name, err);
+    }
+  }
+  return records;
+}
+
 function escapeHtml(s) {
   return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -610,15 +639,16 @@ function renderData(records) {
 
 async function loadData() {
   if (!$("#ledgerBody")) return; // not on the Polyrithm page
-  if (!CONFIG.sheetCsvUrl) { renderData(DEMO); return; }
+  const artSales = await computeArtSalesRecords();
+  if (!CONFIG.sheetCsvUrl) { renderData([...DEMO, ...artSales]); return; }
   try {
     const res = await fetch(CONFIG.sheetCsvUrl, { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const records = rowsToRecords(parseCSV(await res.text()));
-    renderData(records.length ? records : DEMO);
+    renderData([...(records.length ? records : DEMO), ...artSales]);
   } catch (err) {
     console.warn("Could not load the sheet, using demo data:", err);
-    renderData(DEMO);
+    renderData([...DEMO, ...artSales]);
   }
 }
 loadData();
