@@ -33,7 +33,14 @@
     <div class="page-body">
       <p class="artfair-note">Three cities, each a benefit art fair for Venezuela.</p>
       <div class="artfair-search">
-        <input type="search" id="artFairSearch" placeholder="Search by artist, technique, price…" aria-label="Search artists across Houston, Miami, and Pittsburgh" />
+        <p class="artfair-search__label">Looking for someone in particular? Search Houston, Miami, and Pittsburgh at once ↓</p>
+        <div class="artfair-search__box">
+          <svg class="artfair-search__icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.6" />
+            <line x1="12" y1="12" x2="16.5" y2="16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <input type="search" id="artFairSearch" placeholder="Search by artist, technique, price…" aria-label="Search artists across Houston, Miami, and Pittsburgh" />
+        </div>
         <p class="muted artfair-search__hint" id="artFairSearchHint" hidden></p>
       </div>
       <div id="artFairResults" hidden></div>

@@ -606,8 +606,20 @@ function parseCSV(text) {
 }
 
 const norm = (s) => (s || "").toString().trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+// Handles both "1,800" (thousands comma) and "12,50" (decimal comma), plus
+// mixed formats like "1,234.56" or "1.234,56" — whichever separator comes
+// last is the decimal point; the other is stripped as a thousands separator.
 const parseAmount = (s) => {
-  const n = parseFloat((s || "").toString().replace(/[^\d.,-]/g, "").replace(/\.(?=\d{3}\b)/g, "").replace(",", "."));
+  let str = (s || "").toString().trim().replace(/[^\d.,-]/g, "");
+  if (!str) return 0;
+  const lastComma = str.lastIndexOf(","), lastDot = str.lastIndexOf(".");
+  if (lastComma > -1 && lastDot > -1) {
+    str = lastComma > lastDot ? str.replace(/\./g, "").replace(",", ".") : str.replace(/,/g, "");
+  } else if (lastComma > -1) {
+    const parts = str.split(",");
+    str = (parts.length === 2 && parts[1].length <= 2) ? str.replace(",", ".") : str.replace(/,/g, "");
+  }
+  const n = parseFloat(str);
   return isNaN(n) ? 0 : n;
 };
 
@@ -622,10 +634,6 @@ function rowsToRecords(rows) {
     destino: iD >= 0 ? r[iD] : "Medical relief", monto: parseAmount(iM >= 0 ? r[iM] : "0"),
   }));
 }
-
-const DEMO = [
-  { fecha: "2026-07-31", concepto: "Donations to date", destino: "Insumos médicos", monto: 1844 },
-];
 
 // Art Fair sales flow into Transparency automatically: whichever city sheet has a
 // "Sold Amount" column, every confirmed number in it gets summed into one ledger line.
@@ -656,6 +664,70 @@ async function computeArtSalesRecords() {
   return records;
 }
 
+// "Venezuelan Auction List" spreadsheet — the in-person sales/donation ledger
+// used at the fair itself. Each room's internal sales list plus the cash
+// donation log all flow into Transparency automatically.
+const AUCTION_LIST_SHEET_ID = "1g9KJnHsUBlU_HzlAl2sSzXhOEcWqTb3Hw4Fw1cri6RY";
+const AUCTION_LIST_ROOMS = [
+  { gid: "1909031784", room: "Room A" },
+  { gid: "1019884490", room: "Room B" },
+  { gid: "2080770292", room: "Room C" },
+];
+const AUCTION_LIST_CASH_GID = "812683634";
+
+async function fetchGidCsv(sheetId, gid) {
+  const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return parseCSV(await res.text());
+}
+
+async function computeAuctionListRecords() {
+  const records = [];
+  // Internal Sales List Room A/B/C: Artist Name | Artwork Title | Sale Price |
+  // Donation Percentage | Total or Rounded Donation Amount (if applicable) | Buyer | Paid to | Payment Method
+  for (const { gid, room } of AUCTION_LIST_ROOMS) {
+    try {
+      const rows = await fetchGidCsv(AUCTION_LIST_SHEET_ID, gid);
+      for (const r of rows.slice(1)) {
+        const artist = (r[0] || "").trim(), title = (r[1] || "").trim();
+        if (!artist && !title) continue;
+        const salePrice = parseAmount(r[2] || "");
+        const pct = parseAmount(r[3] || "");
+        const donationAmt = parseAmount(r[4] || "");
+        const amount = donationAmt > 0 ? donationAmt : salePrice * ((pct || 100) / 100);
+        if (amount > 0) {
+          records.push({
+            fecha: new Date().toISOString().slice(0, 10),
+            concepto: `Art sale — ${artist}${title ? " — " + title : ""}`,
+            destino: `Art Fair Houston (${room})`,
+            monto: amount,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load auction list " + room, err);
+    }
+  }
+  // Cash Donation: Date | Name | Donation Amount | Via | Recipient
+  try {
+    const rows = await fetchGidCsv(AUCTION_LIST_SHEET_ID, AUCTION_LIST_CASH_GID);
+    for (const r of rows.slice(1)) {
+      const amount = parseAmount(r[2] || "");
+      if (amount > 0) {
+        records.push({
+          fecha: (r[0] || "").trim() || new Date().toISOString().slice(0, 10),
+          concepto: `Donation — ${(r[1] || "").trim() || "Anonymous"}`,
+          destino: (r[3] || "Cash donation").trim(),
+          monto: amount,
+        });
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load cash donations", err);
+  }
+  return records;
+}
+
 function escapeHtml(s) {
   return (s || "").toString().replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -675,16 +747,17 @@ function renderData(records) {
 
 async function loadData() {
   if (!$("#ledgerBody")) return; // not on the Polyrithm page
-  const artSales = await computeArtSalesRecords();
-  if (!CONFIG.sheetCsvUrl) { renderData([...DEMO, ...artSales]); return; }
+  const [artSales, auctionList] = await Promise.all([computeArtSalesRecords(), computeAuctionListRecords()]);
+  const extra = [...artSales, ...auctionList];
+  if (!CONFIG.sheetCsvUrl) { renderData(extra); return; }
   try {
     const res = await fetch(CONFIG.sheetCsvUrl, { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const records = rowsToRecords(parseCSV(await res.text()));
-    renderData([...(records.length ? records : DEMO), ...artSales]);
+    renderData([...records, ...extra]);
   } catch (err) {
-    console.warn("Could not load the sheet, using demo data:", err);
-    renderData([...DEMO, ...artSales]);
+    console.warn("Could not load the sheet:", err);
+    renderData(extra);
   }
 }
 loadData();
