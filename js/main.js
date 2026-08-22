@@ -125,6 +125,25 @@ const ARTFAIR_CITIES = [
     return { all, pieces };
   }
 
+  // Per-piece pricing: "1: $300, 2: $450, 3: $600" maps piece numbers (same
+  // "Piece N of M" numbering as Sold) to their own price text. A price cell
+  // with no "N:" segments is left alone — every existing artist's plain price
+  // ("$500", "Retail $500, Sale $300"…) keeps working exactly as before.
+  function parsePriceMap(raw) {
+    const map = new Map();
+    const re = /(?:^|,)\s*(\d+)\s*:\s*([^,]+)/g;
+    let m;
+    while ((m = re.exec(raw || ""))) map.set(parseInt(m[1], 10), m[2].trim());
+    return map.size ? map : null;
+  }
+
+  // Price shown for one specific piece (buy button, carousel) — falls back to
+  // the flat price when this artist doesn't use per-piece pricing.
+  function priceForPiece(a, pieceNum) {
+    const map = parsePriceMap(a.price);
+    return map ? (map.get(pieceNum) || "") : a.price;
+  }
+
   function rowsToArtworks(rows) {
     if (!rows.length) return [];
     const c = indexColumns(rows[0]);
@@ -166,11 +185,22 @@ const ARTFAIR_CITIES = [
   // Guards against stray links or long text landing in the price cell (messy sheet data).
   const realPrice = (p) => (p && !/^https?:\/\//i.test(p) && p.length <= 40) ? p : "";
 
+  // Summary price for the artist header: a plain price as-is, or (with
+  // per-piece pricing) the first piece's price prefixed "From" if pieces differ.
+  function priceSummary(a) {
+    const map = parsePriceMap(a.price);
+    if (!map) return realPrice(a.price);
+    const vals = [...map.values()].map(realPrice).filter(Boolean);
+    if (!vals.length) return "";
+    return new Set(vals).size === 1 ? vals[0] : `From ${vals[0]}`;
+  }
+
   function metaHtml(a) {
     const p = [];
     if (a.instagram) p.push(`<a href="${esc(a.instagramUrl)}" target="_blank" rel="noopener">${esc(a.instagram)}</a>`);
     if (a.based) p.push(`<span>${esc(a.based)}</span>`);
-    if (realPrice(a.price)) p.push(`<span class="badge">${esc(a.price)}</span>`);
+    const price = priceSummary(a);
+    if (price) p.push(`<span class="badge">${esc(price)}</span>`);
     if (a.donate) p.push(`<span class="badge">Donates ${esc(a.donate)}</span>`);
     return p.join("");
   }
@@ -180,7 +210,7 @@ const ARTFAIR_CITIES = [
   function buyHtml(a, slideIdx) {
     const sold = a.sold && (a.sold.all || a.sold.pieces.has(slideIdx + 1));
     if (sold) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
-    const price = realPrice(a.price);
+    const price = realPrice(priceForPiece(a, slideIdx + 1));
     const total = a.imageIds.length;
     const piece = total > 1 ? `Piece ${slideIdx + 1} of ${total}` : "";
     const img = total ? a.imageIds[slideIdx] || a.imageIds[0] : "";
