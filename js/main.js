@@ -665,38 +665,13 @@ function rowsToRecords(rows) {
   }));
 }
 
-// Art Fair sales flow into Transparency automatically: whichever city sheet has a
-// "Sold Amount" column, every confirmed number in it gets summed into one ledger line.
-async function computeArtSalesRecords() {
-  const records = [];
-  for (const c of ARTFAIR_CITIES) {
-    if (!c.sheetId) continue;
-    try {
-      const res = await fetch(`https://docs.google.com/spreadsheets/d/${c.sheetId}/gviz/tq?tqx=out:csv`, { cache: "no-store" });
-      if (!res.ok) continue;
-      const rows = parseCSV(await res.text());
-      if (!rows.length) continue;
-      const header = rows[0].map((h) => (h || "").toLowerCase());
-      const idx = header.findIndex((h) => h.includes("sold") && (h.includes("amount") || h.includes("monto") || h.includes("received") || h.includes("recibido")));
-      if (idx < 0) continue;
-      let total = 0, count = 0;
-      for (const r of rows.slice(1)) {
-        const v = parseAmount(r[idx] || "");
-        if (v > 0) { total += v; count++; }
-      }
-      if (total > 0) {
-        records.push({ fecha: new Date().toISOString().slice(0, 10), concepto: `Art Fair sales (${count} piece${count === 1 ? "" : "s"})`, destino: `Art Fair ${c.name}`, monto: total });
-      }
-    } catch (err) {
-      console.warn("Could not load art sales for " + c.name, err);
-    }
-  }
-  return records;
-}
-
-// "Venezuelan Auction List" spreadsheet — the in-person sales/donation ledger
-// used at the fair itself. Each room's internal sales list plus the cash
-// donation log all flow into Transparency automatically.
+// "Venezuelan Auction List" spreadsheet is the SOLE source of sale/donation
+// money for Transparency — the in-person sales/donation ledger used at the
+// fair itself. Each room's internal sales list plus the cash donation log
+// flow in automatically. (The "Sold"/"Sold Amount" columns on the Art Fair
+// city sheets are catalog-only — they drive the "Sold" badge/button, but are
+// deliberately NOT summed here, because the same sale ends up recorded in
+// both places and would be double-counted.)
 const AUCTION_LIST_SHEET_ID = "1g9KJnHsUBlU_HzlAl2sSzXhOEcWqTb3Hw4Fw1cri6RY";
 const AUCTION_LIST_ROOMS = [
   { gid: "1909031784", room: "Room A" },
@@ -777,8 +752,7 @@ function renderData(records) {
 
 async function loadData() {
   if (!$("#ledgerBody")) return; // not on the Polyrithm page
-  const [artSales, auctionList] = await Promise.all([computeArtSalesRecords(), computeAuctionListRecords()]);
-  const extra = [...artSales, ...auctionList];
+  const extra = await computeAuctionListRecords();
   if (!CONFIG.sheetCsvUrl) { renderData(extra); return; }
   try {
     const res = await fetch(CONFIG.sheetCsvUrl, { cache: "no-store" });
