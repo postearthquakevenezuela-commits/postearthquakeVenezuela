@@ -119,17 +119,52 @@ const ARTFAIR_CITIES = [
 
   // "Sold" cell holds piece numbers matching the "Piece N of M" the buyer sees
   // (e.g. "1" or "1,3"), or "ALL" if every piece from this artist is gone.
-  // For a single photo standing in for a multi-copy edition (10 identical
-  // prints of the same image), write "copiesSold/copiesTotal" instead, e.g.
-  // "6/10" — the buy button then shows how many are left rather than
-  // disabling outright, and only reads Sold once none remain.
+  //
+  // A single photo standing in for a multi-copy edition (10 identical prints
+  // of the same image) can write "copiesSold/copiesTotal" instead, e.g. "6/10".
+  //
+  // When an artist has SEVERAL different editions — two books, each with its
+  // own page/photo AND its own copy count — give each piece its own fraction
+  // with the same "N:" numbering used for per-piece pricing:
+  // "1: 3/10, 2: 5/20" (book 1 has 3 of 10 sold, book 2 has 5 of 20 sold).
+  // A per-piece segment can also just be "N: ALL" for one edition fully gone.
   function parseSold(raw) {
-    const all = /\ball\b/i.test(raw || "");
-    const copies = (raw || "").match(/(\d+)\s*\/\s*(\d+)/);
+    const str = raw || "";
+    const all = /\ball\b/i.test(str) && !/:/.test(str);
+    const perPiece = new Map();
+    const perPieceRe = /(?:^|,)\s*(\d+)\s*:\s*([^,]+)/g;
+    let pm;
+    while ((pm = perPieceRe.exec(str))) {
+      const val = pm[2].trim();
+      const frac = val.match(/(\d+)\s*\/\s*(\d+)/);
+      perPiece.set(parseInt(pm[1], 10), frac
+        ? { copiesSold: parseInt(frac[1], 10), copiesTotal: parseInt(frac[2], 10) }
+        : { sold: true });
+    }
+    const rest = str.replace(perPieceRe, "");
+    const copies = rest.match(/(\d+)\s*\/\s*(\d+)/);
     const copiesSold = copies ? parseInt(copies[1], 10) : null;
     const copiesTotal = copies ? parseInt(copies[2], 10) : null;
-    const pieces = new Set((raw || "").replace(/\d+\s*\/\s*\d+/, "").split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)));
-    return { all, pieces, copiesSold, copiesTotal };
+    const pieces = new Set(rest.replace(/\d+\s*\/\s*\d+/, "").split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)));
+    return { all, pieces, copiesSold, copiesTotal, perPiece };
+  }
+
+  // Resolves one piece's sold state: per-piece entry first, else the
+  // whole-artist copies/pieces/ALL fields.
+  function pieceStatus(sold, pieceNum) {
+    if (!sold) return { sold: false, remaining: null, total: null };
+    const pp = sold.perPiece.get(pieceNum);
+    if (pp) {
+      if (pp.sold) return { sold: true, remaining: null, total: null };
+      const remaining = pp.copiesTotal - (pp.copiesSold || 0);
+      return { sold: remaining <= 0, remaining, total: pp.copiesTotal };
+    }
+    if (sold.all || sold.pieces.has(pieceNum)) return { sold: true, remaining: null, total: null };
+    if (sold.copiesTotal != null) {
+      const remaining = sold.copiesTotal - (sold.copiesSold || 0);
+      return { sold: remaining <= 0, remaining, total: sold.copiesTotal };
+    }
+    return { sold: false, remaining: null, total: null };
   }
 
   // Per-piece pricing: "1: $300, 2: $450, 3: $600" maps piece numbers (same
@@ -215,17 +250,14 @@ const ARTFAIR_CITIES = [
   // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details,
   // pre-filled with artist, piece, and a reference image so nobody has to type it from memory).
   function buyHtml(a, slideIdx) {
-    const s = a.sold;
-    const remaining = s && s.copiesTotal != null ? s.copiesTotal - (s.copiesSold || 0) : null;
-    if (remaining !== null && remaining <= 0) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
-    const sold = s && (s.all || s.pieces.has(slideIdx + 1));
-    if (sold) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
+    const status = pieceStatus(a.sold, slideIdx + 1);
+    if (status.sold) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
     const price = realPrice(priceForPiece(a, slideIdx + 1));
     const total = a.imageIds.length;
     const piece = total > 1 ? `Piece ${slideIdx + 1} of ${total}` : "";
     const img = total ? a.imageIds[slideIdx] || a.imageIds[0] : "";
     const params = new URLSearchParams({ artist: a.name, city: a.city || "", piece, img });
-    const left = remaining !== null ? ` (${remaining} of ${s.copiesTotal} left)` : "";
+    const left = status.remaining !== null ? ` (${status.remaining} of ${status.total} left)` : "";
     const label = price ? `Buy this piece — ${esc(price)}${left} →` : `Buy this piece${left} →`;
     return `<p class="detail__buy"><a class="btn" href="buy.html?${params.toString()}">${label}</a></p>`;
   }
@@ -278,11 +310,9 @@ const ARTFAIR_CITIES = [
 
   function allSold(a) {
     if (!a.sold) return false;
-    if (a.sold.all) return true;
-    if (a.sold.copiesTotal != null) return (a.sold.copiesSold || 0) >= a.sold.copiesTotal;
     const total = a.imageIds.length;
-    if (!total) return false;
-    for (let n = 1; n <= total; n++) if (!a.sold.pieces.has(n)) return false;
+    if (!total) return a.sold.all;
+    for (let n = 1; n <= total; n++) if (!pieceStatus(a.sold, n).sold) return false;
     return true;
   }
 
@@ -291,9 +321,11 @@ const ARTFAIR_CITIES = [
     const img = first
       ? `<img src="${driveImg(first, 800)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
       : "";
-    const copiesLeft = a.sold && a.sold.copiesTotal != null ? a.sold.copiesTotal - (a.sold.copiesSold || 0) : null;
-    const count = copiesLeft !== null
-      ? (copiesLeft > 0 ? `<span class="art-card__count">${copiesLeft} of ${a.sold.copiesTotal} left</span>` : "")
+    // A single "N left" badge only makes sense when the whole artist is one edition
+    // (no per-piece copy counts to disambiguate) — open the piece for per-book status.
+    const status0 = a.sold && !a.sold.perPiece.size ? pieceStatus(a.sold, 1) : null;
+    const count = status0 && status0.remaining !== null
+      ? (status0.remaining > 0 ? `<span class="art-card__count">${status0.remaining} of ${status0.total} left</span>` : "")
       : (a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "");
     const based = a.based ? `<span>${esc(a.based)}</span>` : "";
     const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
