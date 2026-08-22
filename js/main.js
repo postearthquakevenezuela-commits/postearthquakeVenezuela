@@ -119,10 +119,17 @@ const ARTFAIR_CITIES = [
 
   // "Sold" cell holds piece numbers matching the "Piece N of M" the buyer sees
   // (e.g. "1" or "1,3"), or "ALL" if every piece from this artist is gone.
+  // For a single photo standing in for a multi-copy edition (10 identical
+  // prints of the same image), write "copiesSold/copiesTotal" instead, e.g.
+  // "6/10" — the buy button then shows how many are left rather than
+  // disabling outright, and only reads Sold once none remain.
   function parseSold(raw) {
     const all = /\ball\b/i.test(raw || "");
-    const pieces = new Set((raw || "").split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)));
-    return { all, pieces };
+    const copies = (raw || "").match(/(\d+)\s*\/\s*(\d+)/);
+    const copiesSold = copies ? parseInt(copies[1], 10) : null;
+    const copiesTotal = copies ? parseInt(copies[2], 10) : null;
+    const pieces = new Set((raw || "").replace(/\d+\s*\/\s*\d+/, "").split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)));
+    return { all, pieces, copiesSold, copiesTotal };
   }
 
   // Per-piece pricing: "1: $300, 2: $450, 3: $600" maps piece numbers (same
@@ -208,14 +215,18 @@ const ARTFAIR_CITIES = [
   // No per-artwork checkout — send buyers to the Buy page (payment info + a form that emails us the details,
   // pre-filled with artist, piece, and a reference image so nobody has to type it from memory).
   function buyHtml(a, slideIdx) {
-    const sold = a.sold && (a.sold.all || a.sold.pieces.has(slideIdx + 1));
+    const s = a.sold;
+    const remaining = s && s.copiesTotal != null ? s.copiesTotal - (s.copiesSold || 0) : null;
+    if (remaining !== null && remaining <= 0) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
+    const sold = s && (s.all || s.pieces.has(slideIdx + 1));
     if (sold) return `<p class="detail__buy"><span class="btn btn--sold" aria-disabled="true">Sold — Vendido</span></p>`;
     const price = realPrice(priceForPiece(a, slideIdx + 1));
     const total = a.imageIds.length;
     const piece = total > 1 ? `Piece ${slideIdx + 1} of ${total}` : "";
     const img = total ? a.imageIds[slideIdx] || a.imageIds[0] : "";
     const params = new URLSearchParams({ artist: a.name, city: a.city || "", piece, img });
-    const label = price ? `Buy this piece — ${esc(price)} →` : "Buy this piece →";
+    const left = remaining !== null ? ` (${remaining} of ${s.copiesTotal} left)` : "";
+    const label = price ? `Buy this piece — ${esc(price)}${left} →` : `Buy this piece${left} →`;
     return `<p class="detail__buy"><a class="btn" href="buy.html?${params.toString()}">${label}</a></p>`;
   }
 
@@ -268,6 +279,7 @@ const ARTFAIR_CITIES = [
   function allSold(a) {
     if (!a.sold) return false;
     if (a.sold.all) return true;
+    if (a.sold.copiesTotal != null) return (a.sold.copiesSold || 0) >= a.sold.copiesTotal;
     const total = a.imageIds.length;
     if (!total) return false;
     for (let n = 1; n <= total; n++) if (!a.sold.pieces.has(n)) return false;
@@ -279,7 +291,10 @@ const ARTFAIR_CITIES = [
     const img = first
       ? `<img src="${driveImg(first, 800)}" alt="Work by ${esc(a.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();this.closest('.art-card__img').classList.add('is-empty')">`
       : "";
-    const count = a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "";
+    const copiesLeft = a.sold && a.sold.copiesTotal != null ? a.sold.copiesTotal - (a.sold.copiesSold || 0) : null;
+    const count = copiesLeft !== null
+      ? (copiesLeft > 0 ? `<span class="art-card__count">${copiesLeft} of ${a.sold.copiesTotal} left</span>` : "")
+      : (a.imageIds.length > 1 ? `<span class="art-card__count">${a.imageIds.length} works</span>` : "");
     const based = a.based ? `<span>${esc(a.based)}</span>` : "";
     const donate = a.donate ? `<span class="badge">${esc(a.donate)}</span>` : "";
     const sold = allSold(a) ? `<span class="art-card__sold">Sold — Vendido</span>` : "";
