@@ -7,9 +7,9 @@ Estética editorial/galería (referencia: tremainecollection.org).
 ## Estructura
 - **`index.html`** — intro a pantalla completa (clic/toque revela el subtítulo) + página principal con GIF y accesos a las 4 secciones.
 - **`art-fair.html`** — obras a la venta para recaudar.
-- **`courses.html`** — cursos en video.
 - **`archive.html`** — archivo/memoria.
-- **`polyrithm.html`** — donaciones (PayPal + Zelle) y transparencia (Google Sheet).
+- **`donate.html`** — donaciones (PayPal, Zelle, Venmo).
+- **`transparency.html`** — transparencia: slideshow de Houston + ledger (Google Sheet).
 - `css/styles.css`, `js/main.js`, `assets/`.
 
 ## Qué falta completar (busca `TODO` y `CONFIG`)
@@ -17,7 +17,6 @@ Estética editorial/galería (referencia: tremainecollection.org).
 - **GIF del héroe** (`assets/hero.gif`) — se genera desde las imágenes cuyos enlaces están en el Excel de Google Drive. Pásame ese enlace y lo armo.
 - **PayPal** (`polyrithm.html`) — reemplaza `TU_HOSTED_BUTTON_ID`.
 - **Zelle** (`polyrithm.html`) — correo, titular, banco.
-- **Cursos** (`courses.html`) — `src` reales de los `<iframe>`.
 - **Art Fair / Archive** — imágenes y datos reales (`assets/work-*.jpg`, `assets/archive-*.jpg`).
 - **`js/main.js` → `CONFIG`** — `goal`, `currency`, `sheetCsvUrl` (Google Sheet publicado como CSV).
 

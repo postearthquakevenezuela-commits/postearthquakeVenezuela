@@ -500,69 +500,6 @@ const ARTFAIR_CITIES = [
   });
 })();
 
-/* ---------- Courses calendar (Courses page only) ---------- */
-(function initCourses() {
-  const wrap = document.querySelector("#courseCalendar");
-  if (!wrap) return;
-
-  // Upcoming courses. Edit here to add/remove/change dates.
-  const COURSES = [
-    { date: "2026-07-20", instructor: "Violette Bule",    topic: "Interactive Installation" },
-    { date: "2026-07-25", instructor: "Teresa Mullet",    topic: "Artist Book" },
-    { date: "2026-07-28", instructor: "Mu Blanco",        topic: "Sound Art" },
-    { date: "2026-09-05", instructor: "Yucef Merhi",      topic: "Creative Code" },
-    { date: "2026-09-15", instructor: "Ana Alenso",       topic: "Assemblage" },
-    { date: "2026-09-26", instructor: "Ruben D'Hers",     topic: "Sound Installation" },
-    { date: "2026-09-28", instructor: "Jaime Reyes",      topic: "Code & Video Mapping" },
-    { date: "2026-09-30", instructor: "Ionee Waterhouse", topic: "VJing" },
-    { date: "2026-10-02", instructor: "Miyo Van Stenis",  topic: "3D & Sedition" },
-  ];
-
-  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const parts = (iso) => { const [y, m, d] = iso.split("-").map(Number); return { y, m, d }; };
-  const longDate = (iso) => { const p = parts(iso); return `${MONTHS[p.m - 1]} ${p.d}, ${p.y}`; };
-
-  // Group by "Month Year", preserving order.
-  let html = "", currentKey = "";
-  COURSES.forEach((c, i) => {
-    const p = parts(c.date);
-    const key = `${MONTHS[p.m - 1]} ${p.y}`;
-    if (key !== currentKey) { html += `<h2 class="cal-month">${key}</h2>`; currentKey = key; }
-    html += `<button class="cal-item" data-i="${i}">
-      <span class="cal-item__date"><span class="cal-item__day">${String(p.d).padStart(2, "0")}</span><span class="cal-item__mon">${MONTHS[p.m - 1].slice(0, 3)}</span></span>
-      <span><span class="cal-item__name">${esc(c.instructor)}</span><span class="cal-item__topic">${esc(c.topic)}</span></span>
-      <span class="cal-item__go">Support / Book →</span>
-    </button>`;
-  });
-  wrap.innerHTML = html;
-
-  // Modal wiring
-  const modal = document.querySelector("#courseModal");
-  const mDate = document.querySelector("#modalDate");
-  const mName = document.querySelector("#modalName");
-  const mTopic = document.querySelector("#modalTopic");
-  const mBook = document.querySelector("#modalBook");
-  const bookEmail = (document.querySelector("#bookAll")?.getAttribute("href") || "mailto:hello@example.com").split("?")[0];
-
-  function open(c) {
-    mDate.textContent = longDate(c.date);
-    mName.textContent = c.instructor;
-    mTopic.textContent = c.topic;
-    mBook.setAttribute("href", `${bookEmail}?subject=${encodeURIComponent("Booking — " + c.instructor + " · " + c.topic)}`);
-    modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden", "false");
-  }
-  function close() { modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true"); }
-
-  wrap.querySelectorAll(".cal-item").forEach((btn) =>
-    btn.addEventListener("click", () => open(COURSES[+btn.dataset.i]))
-  );
-  document.querySelector("#modalClose")?.addEventListener("click", close);
-  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-})();
-
 /* ---------- Buy a piece (Buy page only) ---------- */
 (function initBuyForm() {
   const form = document.querySelector("#buyForm");
@@ -645,13 +582,57 @@ const ARTFAIR_CITIES = [
     const to = "artistsforvenezuelamiami@gmail.com";
     const subject = `${method} donation — ${val("#zfFirstName")} ${val("#zfLastName")}`;
     const body = [
-      `Método: ${method}`,
-      `Nombre: ${val("#zfFirstName")}`,
-      `Apellido: ${val("#zfLastName")}`,
-      `Monto Abonado: ${val("#zfAmount")}`,
-      `Fecha: ${val("#zfDate")}`,
+      `Method: ${method}`,
+      `First name: ${val("#zfFirstName")}`,
+      `Last name: ${val("#zfLastName")}`,
+      `Amount donated: ${val("#zfAmount")}`,
+      `Date: ${val("#zfDate")}`,
     ].join("\n");
     window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+})();
+
+/* ---------- Houston slideshow (Transparency page only) ---------- */
+(function initSlideshow() {
+  const root = $("#slideshow");
+  if (!root) return;
+  const slides = $$(".slide", root);
+  const dots = $$(".slideshow__dot", root);
+  let i = 0;
+
+  function go(n) {
+    const next = (n + slides.length) % slides.length;
+    if (next === i) return;
+    slides.forEach((s, k) => {
+      s.classList.toggle("is-active", k === next);
+      s.classList.toggle("is-prev", k < next);
+      s.setAttribute("aria-hidden", k === next ? "false" : "true");
+    });
+    dots.forEach((d, k) => {
+      d.classList.toggle("is-active", k === next);
+      if (k === next) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current");
+    });
+    i = next;
+  }
+
+  $("#slidePrev").addEventListener("click", () => go(i - 1));
+  $("#slideNext").addEventListener("click", () => go(i + 1));
+  dots.forEach((d, k) => d.addEventListener("click", () => go(k)));
+  root.setAttribute("tabindex", "0");
+  root.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") go(i - 1);
+    if (e.key === "ArrowRight") go(i + 1);
+  });
+
+  // Swipe on touch screens.
+  let x0 = null;
+  const track = $("#slideTrack");
+  track.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener("touchend", (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) go(dx < 0 ? i + 1 : i - 1);
+    x0 = null;
   });
 })();
 
