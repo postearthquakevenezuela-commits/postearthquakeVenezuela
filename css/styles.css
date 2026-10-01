@@ -10,6 +10,7 @@
   --line: rgba(20,19,15,.14);
   --line-soft: rgba(20,19,15,.08);
   --accent: #a8331d;     /* terracotta, used sparingly */
+  --wine: #7b1e2e;       /* intro highlight */
   --wrap: 1240px;
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -75,9 +76,20 @@ h1, h2, h3 { font-weight: 500; line-height: 1.05; margin: 0; letter-spacing: -.0
   margin: 0;
 }
 .intro.is-revealed .intro__subtitle { max-height: 240px; opacity: 1; margin: 1.8rem 0 0; }
-.intro.is-revealed .intro__hint { opacity: 0; }
+.intro__message {
+  font-family: var(--display); font-size: clamp(1.25rem, 3.4vw, 2rem); line-height: 1.5;
+  max-width: 30ch; margin: 0 auto;
+  max-height: 0; opacity: 0; overflow: hidden;
+  transition: max-height .7s ease, opacity .7s ease, margin .7s ease;
+}
+.intro__message span {
+  background: var(--wine); color: var(--paper);
+  padding: .1em .35em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.intro.is-revealed-2 .intro__message { max-height: 320px; opacity: 1; margin: 2rem auto 0; }
+.intro.is-revealed-2 .intro__hint { opacity: 0; }
 .intro__actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2.4rem; opacity: 0; max-height: 0; overflow: hidden; transition: opacity .5s ease .1s, max-height .5s ease; }
-.intro.is-revealed .intro__actions { opacity: 1; max-height: 120px; }
+.intro.is-revealed-2 .intro__actions { opacity: 1; max-height: 120px; }
 .intro__cta { font-size: .95rem; }
 
 /* ===== Buttons / links ===== */

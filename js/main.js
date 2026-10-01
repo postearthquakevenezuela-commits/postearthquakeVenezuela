@@ -18,14 +18,15 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 (function initIntro() {
   const intro = $("#intro");
   if (!intro) return;
-  let revealed = false;
+  // Two click-to-reveal steps: 1) the subtitle, 2) the highlighted message.
+  let stage = 0;
 
   function reveal() {
-    if (revealed) return;
-    revealed = true;
-    intro.classList.add("is-revealed");
+    if (stage >= 2) return;
+    stage++;
+    intro.classList.add(stage === 1 ? "is-revealed" : "is-revealed-2");
     const hint = $("#introHint");
-    if (hint) hint.textContent = "";
+    if (hint) hint.textContent = stage === 1 ? "Click again" : "";
   }
   function dismiss(e) {
     if (e) e.preventDefault();
@@ -45,7 +46,7 @@ const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   intro.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") reveal(); });
 
   $("#introEnter") && $("#introEnter").addEventListener("click", (e) => {
-    if (!revealed) { reveal(); e.preventDefault(); return; }
+    if (stage < 2) { reveal(); e.preventDefault(); return; }
     dismiss(e);
   });
   $("#introSkip") && $("#introSkip").addEventListener("click", dismiss);
