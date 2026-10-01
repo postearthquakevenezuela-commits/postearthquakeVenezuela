@@ -171,20 +171,9 @@ main { min-height: 60vh; }
 .city-acc[open] .city-tab__sign { transform: rotate(45deg); }
 .city-acc__body { padding: .2rem 0 2.6rem; }
 .city-soon { color: var(--muted); padding: 0 0 1rem; }
-.city-announce { border-top: 1px solid var(--line); padding: 1.4rem .1rem 0; }
-.city-announce + .city-acc { border-top: 0; }
-.event-info { margin: 0 0 1rem; color: var(--ink); max-width: 68ch; line-height: 1.6; }
+.event-info { margin: 0 0 1.8rem; color: var(--ink); max-width: 68ch; line-height: 1.6; }
 .event-info strong { color: var(--accent); font-weight: 500; }
 .event-info a { color: var(--ink); border-bottom: 1px solid currentColor; }
-.open-banner { margin: 0 0 1.5rem; color: var(--muted); }
-.open-banner strong { color: var(--accent); font-weight: 500; }
-.open-banner a { color: var(--ink); border-bottom: 1px solid currentColor; }
-.open-call { border: 1px dashed var(--line); background: rgba(20,19,15,.02); padding: clamp(1.5rem, 4vw, 2.6rem); }
-.open-call__status { font-family: var(--display); font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--accent); margin: 0 0 .6rem; }
-.open-call__text { color: var(--muted); max-width: 58ch; margin: 0 0 1.5rem; line-height: 1.6; }
-.form-embed { border: 1px solid var(--line); background: #fff; overflow: hidden; }
-.form-embed iframe { width: 100%; height: 1200px; border: 0; display: block; }
-@media (max-width: 600px) { .form-embed iframe { height: 1500px; } }
 
 .doc-embed { border: 1px solid var(--line); background: #fff; overflow: hidden; margin: 1.2rem 0; }
 .doc-embed iframe { width: 100%; height: 900px; border: 0; display: block; }
@@ -224,6 +213,10 @@ main { min-height: 60vh; }
 .artfair-search input:focus { outline: none; }
 .artfair-search input::placeholder { color: var(--muted); }
 .artfair-search__hint { margin: .7rem 0 0; }
+.artfair-callout { border-left: 3px solid var(--wine); padding: .2rem 0 .2rem 1.1rem; margin: 0 0 2.4rem; max-width: 62ch; }
+.artfair-callout p { margin: 0; font-family: var(--display); font-size: clamp(1.15rem, 2.6vw, 1.45rem); line-height: 1.4; }
+.artfair-callout .note { font-family: var(--font); font-size: .9rem; margin-top: .6rem; }
+.artfair-callout a { color: var(--ink); border-bottom: 1px solid currentColor; }
 @keyframes artfair-search-invite {
   0%, 100% { box-shadow: 0 0 0 0 rgba(168, 51, 29, 0); }
   30% { box-shadow: 0 0 0 6px rgba(168, 51, 29, .12); }
